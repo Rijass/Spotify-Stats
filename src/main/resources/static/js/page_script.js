@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const panelLede = document.getElementById('panel-lede');
     const panelPlaceholder = document.getElementById('panel-placeholder');
     const panelBadge = document.getElementById('panel-badge');
+    const followerStat = document.querySelector('[data-stat="followers"] strong');
+    const heroTitle = document.querySelector('.hero-text h1');
+    const avatarPlaceholder = document.querySelector('.avatar-placeholder');
 
     const tabContent = {
         welcome: {
@@ -69,6 +72,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiBase = 'http://127.0.0.1:8080/api';
 
+    const renderSpotifyProfile = (profile) => {
+        if (profile?.displayName && heroTitle) {
+            heroTitle.textContent = profile.displayName;
+        }
+
+        if (profile?.displayName && avatarPlaceholder) {
+            avatarPlaceholder.textContent = profile.displayName.substring(0, 2).toUpperCase();
+        }
+
+        if (typeof profile?.followers === 'number' && followerStat) {
+            followerStat.textContent = profile.followers.toLocaleString('de-DE');
+        }
+    };
+
+    const loadSpotifyProfile = async () => {
+        const response = await fetch(`${apiBase}/spotify/profile`, { credentials: 'include' });
+        if (!response.ok) {
+            return;
+        }
+
+        const profile = await response.json();
+        renderSpotifyProfile(profile);
+    };
+
     const unlockDashboard = () => {
         root.classList.remove('locked');
         gates.forEach((gate) => gate.classList.add('dismissed'));
@@ -92,14 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch(`${apiBase}/spotify/status`, { credentials: 'include' });
         if (!response.ok) {
             keepLocked();
-            return;
+            return false;
         }
 
         const { connected } = await response.json();
         if (connected) {
             unlockDashboard();
+            await loadSpotifyProfile();
+            return true;
         } else {
             keepLocked();
+            return false;
         }
     };
 
@@ -127,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('connected') === 'spotify') {
             unlockDashboard();
+            loadSpotifyProfile();
             urlParams.delete('connected');
             const url = new URL(window.location.href);
             url.search = urlParams.toString();

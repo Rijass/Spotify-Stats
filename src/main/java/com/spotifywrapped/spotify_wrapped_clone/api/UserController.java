@@ -4,7 +4,7 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.AuthResponseDto;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.LoginDto;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoIn;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoOut;
-import com.spotifywrapped.spotify_wrapped_clone.service.UserService;
+import com.spotifywrapped.spotify_wrapped_clone.service.user_services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;

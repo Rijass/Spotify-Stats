@@ -56,6 +56,14 @@ public class UserDBaccess {
             existingUser.setSpotifyRefreshToken(userUpdates.getSpotifyRefreshToken());
         }
 
+        if (userUpdates.getSpotifyAccessToken() != null) {
+            existingUser.setSpotifyAccessToken(userUpdates.getSpotifyAccessToken());
+        }
+
+        if (userUpdates.getSpotifyAccessTokenExpiresAt() != null) {
+            existingUser.setSpotifyAccessTokenExpiresAt(userUpdates.getSpotifyAccessTokenExpiresAt());
+        }
+
         return existingUser;
     }
 
@@ -117,6 +125,20 @@ public class UserDBaccess {
         }
 
         existingUser.setSpotifyRefreshToken(encryptedRefreshToken);
+    }
+
+    public void updateSpotifyTokens(Long userId, String encryptedRefreshToken, String encryptedAccessToken, Instant accessTokenExpiresAt) {
+        User existingUser = entityManager.find(User.class, userId);
+        if (existingUser == null) {
+            return;
+        }
+
+        if (encryptedRefreshToken != null) {
+            existingUser.setSpotifyRefreshToken(encryptedRefreshToken);
+        }
+
+        existingUser.setSpotifyAccessToken(encryptedAccessToken);
+        existingUser.setSpotifyAccessTokenExpiresAt(accessTokenExpiresAt);
     }
 
 }

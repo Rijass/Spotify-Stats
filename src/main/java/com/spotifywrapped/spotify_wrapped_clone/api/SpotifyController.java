@@ -1,9 +1,11 @@
 package com.spotifywrapped.spotify_wrapped_clone.api;
 
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyStatusDto;
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyProfileDto;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
-import com.spotifywrapped.spotify_wrapped_clone.service.SpotifyAuthService;
-import com.spotifywrapped.spotify_wrapped_clone.service.UserService;
+import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyAuthService;
+import com.spotifywrapped.spotify_wrapped_clone.service.user_services.UserService;
+import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyProfileService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -25,10 +27,12 @@ public class SpotifyController {
 
     private final SpotifyAuthService spotifyAuthService;
     private final UserService userService;
+    private final SpotifyProfileService spotifyProfileService;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public SpotifyController(SpotifyAuthService spotifyAuthService, UserService userService) {
+    public SpotifyController(SpotifyAuthService spotifyAuthService, SpotifyProfileService spotifyProfileService, UserService userService) {
         this.spotifyAuthService = spotifyAuthService;
+        this.spotifyProfileService = spotifyProfileService;
         this.userService = userService;
     }
 
@@ -110,5 +114,26 @@ public class SpotifyController {
         byte[] bytes = new byte[24];
         secureRandom.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<SpotifyProfileDto> spotifyProfile(
+            @CookieValue(value = "sessionToken", required = false) String sessionToken) {
+
+        User user = userService.findUserBySessionToken(sessionToken);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            SpotifyProfileDto profile = spotifyProfileService.fetchProfile(user);
+            if (profile == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+
+            return ResponseEntity.ok(profile);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
     }
 }

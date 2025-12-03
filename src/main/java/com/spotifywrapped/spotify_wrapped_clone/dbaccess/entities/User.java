@@ -25,6 +25,12 @@ public class User {
     @Column(name = "spotify_refresh_token", length = 1024)
     private String spotifyRefreshToken;
 
+    @Column(name = "spotify_access_token", length = 1024)
+    private String spotifyAccessToken;
+
+    @Column(name = "spotify_access_token_expires_at")
+    private Instant spotifyAccessTokenExpiresAt;
+
     @Column(name = "session_token", length = 512)
     private String sessionToken;
 
@@ -77,6 +83,22 @@ public class User {
 
     public void setSpotifyRefreshToken(String spotifyRefreshToken) {
         this.spotifyRefreshToken = spotifyRefreshToken;
+    }
+
+    public String getSpotifyAccessToken() {
+        return spotifyAccessToken;
+    }
+
+    public void setSpotifyAccessToken(String spotifyAccessToken) {
+        this.spotifyAccessToken = spotifyAccessToken;
+    }
+
+    public Instant getSpotifyAccessTokenExpiresAt() {
+        return spotifyAccessTokenExpiresAt;
+    }
+
+    public void setSpotifyAccessTokenExpiresAt(Instant spotifyAccessTokenExpiresAt) {
+        this.spotifyAccessTokenExpiresAt = spotifyAccessTokenExpiresAt;
     }
 
     public String getSessionToken() {
