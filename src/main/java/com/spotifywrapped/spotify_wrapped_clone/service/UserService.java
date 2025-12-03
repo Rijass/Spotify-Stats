@@ -1,14 +1,15 @@
 package com.spotifywrapped.spotify_wrapped_clone.service;
 
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.AuthResponseDto;
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.LoginDto;
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.UserDtoIn;
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.UserDtoOut;
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.AuthResponseDto;
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.LoginDto;
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoIn;
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoOut;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.UserDBaccess;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -29,7 +30,7 @@ public class UserService {
         User user = mapToEntity(userDtoIn);
         String rawSessionToken = ensureSessionToken(user);
         user.setPassword(sensitiveDataService.hashPassword(user.getPassword()));
-        user.setSessionToken(sensitiveDataService.encrypt(user.getSessionToken()));
+        user.setSessionToken(sensitiveDataService.hashToken(user.getSessionToken()));
         user.setSessionExpiresAt(calculateSessionExpiry());
         user.setSpotifyRefreshToken(sensitiveDataService.encrypt(user.getSpotifyRefreshToken()));
 
@@ -71,7 +72,8 @@ public class UserService {
 
         String rawSessionToken = sensitiveDataService.newSessionToken();
         Instant sessionExpiresAt = calculateSessionExpiry();
-        userDBaccess.updateSession(user.getId(), sensitiveDataService.encrypt(rawSessionToken), sessionExpiresAt);
+        String hashedToken = sensitiveDataService.hashToken(rawSessionToken);
+        userDBaccess.updateSession(user.getId(), hashedToken, sessionExpiresAt);
         return new AuthResponseDto(user.getId(), user.getUsername(), user.getEmail(), rawSessionToken);
     }
 
@@ -82,9 +84,29 @@ public class UserService {
 
         Instant now = Instant.now();
         return userDBaccess.findActiveSessions(now).stream()
-                .map(User::getSessionToken)
-                .map(sensitiveDataService::decrypt)
-                .anyMatch(rawSessionToken::equals);
+                .anyMatch(u -> sensitiveDataService.tokenMatches(rawSessionToken, u.getSessionToken()));
+    }
+
+    public User findUserBySessionToken(String rawSessionToken) {
+        if (rawSessionToken == null || rawSessionToken.isBlank()) {
+            return null;
+        }
+
+        Instant now = Instant.now();
+        return userDBaccess.findActiveSessions(now).stream()
+                .filter(u -> sensitiveDataService.tokenMatches(rawSessionToken, u.getSessionToken()))
+                .findFirst()
+                .orElse(null);
+    }
+
+
+    public void updateSpotifyRefreshToken(Long userId, String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return;
+        }
+
+        String encrypted = sensitiveDataService.encrypt(refreshToken);
+        userDBaccess.updateSpotifyRefreshToken(userId, encrypted);
     }
 
     // === Helper methods ===

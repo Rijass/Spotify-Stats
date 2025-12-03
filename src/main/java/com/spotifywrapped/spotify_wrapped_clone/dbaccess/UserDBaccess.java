@@ -99,4 +99,24 @@ public class UserDBaccess {
                 .getResultList();
     }
 
+    public User findBySessionToken(String encryptedSessionToken, Instant now) {
+        return entityManager.createQuery(
+                        "SELECT u FROM User u WHERE u.sessionToken = :token AND u.sessionExpiresAt > :now",
+                        User.class)
+                .setParameter("token", encryptedSessionToken)
+                .setParameter("now", now)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void updateSpotifyRefreshToken(Long userId, String encryptedRefreshToken) {
+        User existingUser = entityManager.find(User.class, userId);
+        if (existingUser == null) {
+            return;
+        }
+
+        existingUser.setSpotifyRefreshToken(encryptedRefreshToken);
+    }
+
 }

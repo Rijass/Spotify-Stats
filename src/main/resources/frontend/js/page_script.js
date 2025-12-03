@@ -67,6 +67,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const apiBase = 'http://localhost:8080/api';
+
+    const unlockDashboard = () => {
+        root.classList.remove('locked');
+        gates.forEach((gate) => gate.classList.add('dismissed'));
+    };
+
+    const keepLocked = () => {
+        root.classList.add('locked');
+        gates.forEach((gate) => gate.classList.remove('dismissed'));
+    };
+
+    const ensureSession = async () => {
+        const response = await fetch(`${apiBase}/users/session`, { credentials: 'include' });
+        if (!response.ok) {
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    };
+
+    const checkSpotifyStatus = async () => {
+        const response = await fetch(`${apiBase}/spotify/status`, { credentials: 'include' });
+        if (!response.ok) {
+            keepLocked();
+            return;
+        }
+
+        const { connected } = await response.json();
+        if (connected) {
+            unlockDashboard();
+        } else {
+            keepLocked();
+        }
+    };
+
     const initialTab = new URLSearchParams(window.location.search).get('tab') || 'welcome';
     setActiveTab(initialTab, false);
 
@@ -79,10 +115,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     spotifyButtons.forEach((button) => {
         button.addEventListener('click', () => {
-            // Hier würdest du den echten Spotify-OAuth-Flow starten.
-            // Beispiel: window.location.href = '/api/spotify/authorize';
-            root.classList.remove('locked');
-            gates.forEach((gate) => gate.classList.add('dismissed'));
+            window.location.href = `${apiBase}/spotify/login`;
         });
+    });
+
+    ensureSession().then((authenticated) => {
+        if (!authenticated) {
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('connected') === 'spotify') {
+            unlockDashboard();
+            urlParams.delete('connected');
+            const url = new URL(window.location.href);
+            url.search = urlParams.toString();
+            window.history.replaceState({}, '', url.toString());
+        } else {
+            checkSpotifyStatus();
+        }
     });
 });

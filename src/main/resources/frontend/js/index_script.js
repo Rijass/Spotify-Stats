@@ -38,6 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 redirectToApp();
             }
+            if (response.status === 401) {
+                localStorage.removeItem('spotify-tracker-id');
+                localStorage.removeItem('spotify-tracker-user');
+                console.log('Session expired');
+            }
         } catch (error) {
             console.error('Session check failed', error);
         }
@@ -54,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const persistSession = (data) => {
-        if (data?.sessionToken) {
-            localStorage.setItem('spotify-tracker-session', data.sessionToken);
+        if (data?.id) {
+            localStorage.setItem('spotify-tracker-id', data.id);
         }
         if (data?.username) {
             localStorage.setItem('spotify-tracker-user', data.username);

@@ -1,4 +1,4 @@
-package com.spotifywrapped.spotify_wrapped_clone.api.dto;
+package com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto;
 
 import java.time.Instant;
 
