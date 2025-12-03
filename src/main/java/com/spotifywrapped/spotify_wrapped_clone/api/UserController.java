@@ -26,7 +26,11 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDtoOut> createUser(@RequestBody UserDtoIn userDtoIn) {
         UserDtoOut user = userService.createUser(userDtoIn);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        ResponseCookie sessionCookie = buildSessionCookie(user.sessionToken());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
+                .body(user);
     }
 
     @PutMapping("/{id}")
@@ -58,17 +62,21 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ResponseCookie sessionCookie = ResponseCookie.from("sessionToken", authResponse.sessionToken())
+        ResponseCookie sessionCookie = buildSessionCookie(authResponse.sessionToken());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
+                .body(authResponse);
+    }
+
+    private ResponseCookie buildSessionCookie(String sessionToken) {
+        return ResponseCookie.from("sessionToken", sessionToken)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
                 .maxAge(Duration.ofDays(30))
                 .path("/")
                 .build();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
-                .body(authResponse);
     }
 
     @GetMapping("/session")
