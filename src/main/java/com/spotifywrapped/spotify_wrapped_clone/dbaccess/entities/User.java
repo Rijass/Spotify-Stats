@@ -1,7 +1,7 @@
 package com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -22,8 +22,14 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at")
+    @Column(name = "spotify_refresh_token", length = 1024)
+    private String spotifyRefreshToken;
+
+    @Column(name = "session_token", length = 512)
+    private String sessionToken;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
     private Instant createdAt;
 
     public Long getId() {
@@ -62,8 +68,19 @@ public class User {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    public String getSpotifyRefreshToken() {
+        return spotifyRefreshToken;
     }
 
+    public void setSpotifyRefreshToken(String spotifyRefreshToken) {
+        this.spotifyRefreshToken = spotifyRefreshToken;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
+    }
 }

@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         trigger.addEventListener('click', () => switchTab(trigger.dataset.tabTrigger));
     });
 
+    const apiBase = 'http://localhost:8080/api/users';
+
     const showFeedback = (message) => {
         feedback.textContent = message;
         feedback.classList.add('show');
@@ -34,8 +36,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleSuccess = (action) => {
         showFeedback(`${action} erfolgreich! Du wirst weitergeleitet ...`);
         setTimeout(() => {
-            window.location.href = 'test.html';
+            window.location.href = 'page.html';
         }, 900);
+    };
+
+    const persistSession = (data) => {
+        if (data?.sessionToken) {
+            localStorage.setItem('spotify-tracker-session', data.sessionToken);
+        }
+        if (data?.username) {
+            localStorage.setItem('spotify-tracker-user', data.username);
+        }
+    };
+
+    const postJson = async (path, payload) => {
+        const response = await fetch(`${apiBase}${path}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const message = await response.text();
+            throw new Error(message || 'Unbekannter Fehler');
+        }
+
+        return response.json();
     };
 
     const loginForm = document.getElementById('login-form');
@@ -49,9 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Hier könnte ein API-Request für den Login folgen.
-        localStorage.setItem('spotify-tracker-user', identifier);
-        handleSuccess('Login');
+        postJson('/login', { identifier, password })
+            .then((data) => {
+                persistSession(data);
+                handleSuccess('Login');
+            })
+            .catch(() => {
+                showFeedback('Login fehlgeschlagen. Bitte überprüfe deine Daten.');
+            });
     });
 
     const registerForm = document.getElementById('register-form');
@@ -66,8 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Hier könnte ein API-Request für die Registrierung folgen.
-        localStorage.setItem('spotify-tracker-user', username);
-        handleSuccess('Registrierung');
+        postJson('', { username, email, password })
+            .then((data) => {
+                persistSession(data);
+                handleSuccess('Registrierung');
+            })
+            .catch(() => {
+                showFeedback('Registrierung fehlgeschlagen. Bitte erneut versuchen.');
+            });
     });
 });
