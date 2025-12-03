@@ -4,7 +4,6 @@ public record UserDtoIn(
         String username,
         String email,
         String password,
-        String sessionToken,
-        String spotifyRefreshToken
+        String sessionToken
 ) {
 }

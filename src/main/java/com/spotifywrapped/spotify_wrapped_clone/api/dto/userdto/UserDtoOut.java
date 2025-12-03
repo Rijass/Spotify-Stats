@@ -7,7 +7,6 @@ public record UserDtoOut(
         String username,
         String email,
         Instant createdAt,
-        String sessionToken,
-        String spotifyRefreshToken
+        String sessionToken
 ) {
 }

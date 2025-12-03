@@ -3,8 +3,6 @@ package com.spotifywrapped.spotify_wrapped_clone.service.spotify_services;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyProfileDto;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
-import com.spotifywrapped.spotify_wrapped_clone.service.SensitiveDataService;
-import com.spotifywrapped.spotify_wrapped_clone.service.user_services.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -16,28 +14,19 @@ import java.util.List;
 @Service
 public class SpotifyProfileService {
 
-    // Spotify Standard-Token-Laufzeit (falls expires_in nicht gesendet wird)
-    private static final int ACCESS_TOKEN_LIFETIME_SECONDS = 3600;
-
-    // Sicherheitsbuffer, bevor der Token ausläuft (damit er nicht knapp abläuft)
-    private static final int ACCESS_TOKEN_REFRESH_BUFFER_SECONDS = 60;
-
     private final RestTemplate restTemplate = new RestTemplate();
     private final SpotifyAuthService spotifyAuthService;
-    private final SensitiveDataService sensitiveDataService;
-    private final UserService userService;
+    private final SpotifyTokenService spotifyTokenService;
 
     @Value("${spring.security.oauth2.client.provider.spotify.user-info-uri}")
     private String userInfoUri;
 
     public SpotifyProfileService(
             SpotifyAuthService spotifyAuthService,
-            SensitiveDataService sensitiveDataService,
-            UserService userService
+            SpotifyTokenService spotifyTokenService
     ) {
         this.spotifyAuthService = spotifyAuthService;
-        this.sensitiveDataService = sensitiveDataService;
-        this.userService = userService;
+        this.spotifyTokenService = spotifyTokenService;
     }
 
     /**
@@ -49,14 +38,13 @@ public class SpotifyProfileService {
             return null;
         }
 
-        // Refresh Token entschlüsseln
-        String refreshToken = sensitiveDataService.decrypt(user.getSpotifyRefreshToken());
-        if (refreshToken == null || refreshToken.isBlank()) {
+        SpotifyTokenService.DecryptedSpotifyTokens tokens = spotifyTokenService.getDecryptedTokens(user.getId());
+        if (tokens == null || tokens.refreshToken() == null || tokens.refreshToken().isBlank()) {
             return null;
         }
 
         // Stellt sicher, dass wir einen gültigen Access Token haben
-        String accessToken = getValidAccessToken(user, refreshToken);
+        String accessToken = getValidAccessToken(user.getId(), tokens);
 
         // Anfrage an Spotify /me Endpoint
         HttpHeaders headers = new HttpHeaders();
@@ -93,62 +81,33 @@ public class SpotifyProfileService {
      * – Falls er abgelaufen ist → wird ein neuer per Refresh Token geholt.
      * – Speichert neue Token verschlüsselt in der Datenbank.
      */
-    private String getValidAccessToken(User user, String refreshToken) {
+    private String getValidAccessToken(Long userId, SpotifyTokenService.DecryptedSpotifyTokens tokens) {
         Instant now = Instant.now();
 
-        String decryptedAccessToken = sensitiveDataService.decrypt(user.getSpotifyAccessToken());
-        Instant cachedExpiresAt = user.getSpotifyAccessTokenExpiresAt();
-
-        // Prüfen, ob der gespeicherte Token noch gültig ist
-        if (decryptedAccessToken != null &&
-                cachedExpiresAt != null &&
-                cachedExpiresAt.isAfter(now)) {
-            return decryptedAccessToken;
+        if (tokens.accessToken() != null &&
+                tokens.accessTokenExpiresAt() != null &&
+                tokens.accessTokenExpiresAt().isAfter(now)) {
+            return tokens.accessToken();
         }
 
         // Token ist abgelaufen → neuen holen
         SpotifyAuthService.SpotifyTokenResponse tokenResponse =
-                spotifyAuthService.refreshAccessToken(refreshToken);
+                spotifyAuthService.refreshAccessToken(tokens.refreshToken());
 
-        // Ablaufzeitpunkt berechnen
-        Instant expiresAt = now.plusSeconds(
-                calculateCacheTtlSeconds(tokenResponse.expiresIn())
+        Instant expiresAt = spotifyTokenService.calculateAccessTokenExpiry(
+                tokenResponse.expiresIn(),
+                now
         );
 
         // Tokens sicher in der DB aktualisieren
-        userService.updateSpotifyTokens(
-                user.getId(),
+        spotifyTokenService.updateTokens(
+                userId,
                 tokenResponse.refreshToken(),
                 tokenResponse.accessToken(),
                 expiresAt
         );
 
-        // Nutzer-Objekt im Speicher aktualisieren
-        if (tokenResponse.refreshToken() != null && !tokenResponse.refreshToken().isBlank()) {
-            user.setSpotifyRefreshToken(sensitiveDataService.encrypt(tokenResponse.refreshToken()));
-        }
-
-        user.setSpotifyAccessToken(sensitiveDataService.encrypt(tokenResponse.accessToken()));
-        user.setSpotifyAccessTokenExpiresAt(expiresAt);
-
         return tokenResponse.accessToken();
-    }
-
-    /**
-     * Berechnet, wie lange ein Token gecached werden darf.
-     * – Nutzt expire_in oder Default (3600s)
-     * – Zieht einen kleinen Buffer ab, damit der Token nicht in letzter Sekunde abläuft
-     */
-    private long calculateCacheTtlSeconds(Integer expiresIn) {
-        int lifetime = expiresIn != null ? expiresIn : ACCESS_TOKEN_LIFETIME_SECONDS;
-
-        // Spotify sendet teilweise höhere expiry-Werte → wir deckeln sie
-        int boundedLifetime = Math.min(lifetime, ACCESS_TOKEN_LIFETIME_SECONDS);
-
-        // Sicherheitsbuffer abziehen
-        int ttl = boundedLifetime - ACCESS_TOKEN_REFRESH_BUFFER_SECONDS;
-
-        return Math.max(ttl, 0);
     }
 
     /**

@@ -22,14 +22,8 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "spotify_refresh_token", length = 1024)
-    private String spotifyRefreshToken;
-
-    @Column(name = "spotify_access_token", length = 1024)
-    private String spotifyAccessToken;
-
-    @Column(name = "spotify_access_token_expires_at")
-    private Instant spotifyAccessTokenExpiresAt;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private SpotifyToken spotifyToken;
 
     @Column(name = "session_token", length = 512)
     private String sessionToken;
@@ -77,28 +71,12 @@ public class User {
         return createdAt;
     }
 
-    public String getSpotifyRefreshToken() {
-        return spotifyRefreshToken;
+    public SpotifyToken getSpotifyToken() {
+        return spotifyToken;
     }
 
-    public void setSpotifyRefreshToken(String spotifyRefreshToken) {
-        this.spotifyRefreshToken = spotifyRefreshToken;
-    }
-
-    public String getSpotifyAccessToken() {
-        return spotifyAccessToken;
-    }
-
-    public void setSpotifyAccessToken(String spotifyAccessToken) {
-        this.spotifyAccessToken = spotifyAccessToken;
-    }
-
-    public Instant getSpotifyAccessTokenExpiresAt() {
-        return spotifyAccessTokenExpiresAt;
-    }
-
-    public void setSpotifyAccessTokenExpiresAt(Instant spotifyAccessTokenExpiresAt) {
-        this.spotifyAccessTokenExpiresAt = spotifyAccessTokenExpiresAt;
+    public void setSpotifyToken(SpotifyToken spotifyToken) {
+        this.spotifyToken = spotifyToken;
     }
 
     public String getSessionToken() {

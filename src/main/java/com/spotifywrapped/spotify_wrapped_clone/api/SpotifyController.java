@@ -5,6 +5,7 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyProfil
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyAuthService;
 import com.spotifywrapped.spotify_wrapped_clone.service.user_services.UserService;
+import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyTokenService;
 import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyProfileService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
 
 @RestController
@@ -28,12 +30,19 @@ public class SpotifyController {
     private final SpotifyAuthService spotifyAuthService;
     private final UserService userService;
     private final SpotifyProfileService spotifyProfileService;
+    private final SpotifyTokenService spotifyTokenService;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public SpotifyController(SpotifyAuthService spotifyAuthService, SpotifyProfileService spotifyProfileService, UserService userService) {
+    public SpotifyController(
+            SpotifyAuthService spotifyAuthService,
+            SpotifyProfileService spotifyProfileService,
+            UserService userService,
+            SpotifyTokenService spotifyTokenService
+    ) {
         this.spotifyAuthService = spotifyAuthService;
         this.spotifyProfileService = spotifyProfileService;
         this.userService = userService;
+        this.spotifyTokenService = spotifyTokenService;
     }
 
     @GetMapping("/login")
@@ -80,7 +89,16 @@ public class SpotifyController {
         }
 
         SpotifyAuthService.SpotifyTokenResponse tokenResponse = spotifyAuthService.exchangeCodeForToken(code);
-        userService.updateSpotifyRefreshToken(user.getId(), tokenResponse.refreshToken());
+        Instant expiresAt = spotifyTokenService.calculateAccessTokenExpiry(
+                tokenResponse.expiresIn(),
+                Instant.now()
+        );
+        spotifyTokenService.updateTokens(
+                user.getId(),
+                tokenResponse.refreshToken(),
+                tokenResponse.accessToken(),
+                expiresAt
+        );
 
         ResponseCookie deleteStateCookie = ResponseCookie.from("spotify_state", "")
                 .httpOnly(true)
@@ -106,7 +124,7 @@ public class SpotifyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        boolean connected = user.getSpotifyRefreshToken() != null && !user.getSpotifyRefreshToken().isBlank();
+        boolean connected = spotifyTokenService.hasRefreshToken(user.getId());
         return ResponseEntity.ok(new SpotifyStatusDto(connected));
     }
 

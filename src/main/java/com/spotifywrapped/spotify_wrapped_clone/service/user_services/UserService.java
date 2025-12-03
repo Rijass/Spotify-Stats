@@ -54,7 +54,6 @@ public class UserService {
         user.setPassword(sensitiveDataService.hashPassword(user.getPassword()));
         user.setSessionToken(sensitiveDataService.hashToken(user.getSessionToken()));
         user.setSessionExpiresAt(calculateSessionExpiry());
-        user.setSpotifyRefreshToken(sensitiveDataService.encrypt(user.getSpotifyRefreshToken()));
 
         userDBaccess.createUser(user);
 
@@ -72,17 +71,6 @@ public class UserService {
         }
         if (userUpdates.getSessionToken() != null) {
             userUpdates.setSessionToken(sensitiveDataService.encrypt(userUpdates.getSessionToken()));
-        }
-        if (userUpdates.getSpotifyRefreshToken() != null) {
-            userUpdates.setSpotifyRefreshToken(sensitiveDataService.encrypt(userUpdates.getSpotifyRefreshToken()));
-        }
-        if (userUpdates.getSpotifyAccessToken() != null) {
-            userUpdates.setSpotifyAccessToken(sensitiveDataService.encrypt(userUpdates.getSpotifyAccessToken()));
-        }
-
-        // ExpiresAt muss nur gesetzt werden – kein Hashing nötig
-        if (userUpdates.getSpotifyAccessTokenExpiresAt() != null) {
-            userUpdates.setSpotifyAccessTokenExpiresAt(userUpdates.getSpotifyAccessTokenExpiresAt());
         }
 
         User updatedUser = userDBaccess.updateUser(id, userUpdates);
@@ -154,40 +142,6 @@ public class UserService {
                 .orElse(null);
     }
 
-    /**
-     * Aktualisiert nur das Spotify Refresh Token eines Users.
-     */
-    public void updateSpotifyRefreshToken(Long userId, String refreshToken) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            return;
-        }
-
-        String encrypted = sensitiveDataService.encrypt(refreshToken);
-        userDBaccess.updateSpotifyRefreshToken(userId, encrypted);
-    }
-
-    /**
-     * Aktualisiert die Spotify OAuth Tokens + deren Ablaufzeit.
-     */
-    public void updateSpotifyTokens(Long userId, String refreshToken, String accessToken, Instant accessTokenExpiresAt) {
-        if (accessToken == null || accessToken.isBlank() || accessTokenExpiresAt == null) {
-            return;
-        }
-
-        String encryptedAccessToken = sensitiveDataService.encrypt(accessToken);
-        String encryptedRefreshToken =
-                (refreshToken == null || refreshToken.isBlank())
-                        ? null
-                        : sensitiveDataService.encrypt(refreshToken);
-
-        userDBaccess.updateSpotifyTokens(
-                userId,
-                encryptedRefreshToken,
-                encryptedAccessToken,
-                accessTokenExpiresAt
-        );
-    }
-
 
 
     // ============================================================
@@ -203,7 +157,6 @@ public class UserService {
         user.setEmail(dtoIn.email());
         user.setPassword(dtoIn.password());
         user.setSessionToken(dtoIn.sessionToken());
-        user.setSpotifyRefreshToken(dtoIn.spotifyRefreshToken());
         return user;
     }
 
@@ -216,8 +169,7 @@ public class UserService {
                 user.getUsername(),
                 user.getEmail(),
                 user.getCreatedAt(),
-                rawSessionToken,
-                sensitiveDataService.decrypt(user.getSpotifyRefreshToken())
+                rawSessionToken
         );
     }
 
