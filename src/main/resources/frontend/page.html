@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Tracker | Übersicht</title>
+    <link rel="stylesheet" href="css/page_style.css">
+</head>
+<body class="locked">
+<header class="top-bar">
+    <div class="logo">
+        <span class="logo-icon">🎧</span>
+        <span class="logo-text">Spotify Tracker</span>
+    </div>
+    <a class="ghost-button" href="index.html">Logout</a>
+</header>
+
+<main class="dashboard">
+    <section class="hero-area">
+        <div class="gate-overlay hero-gate">
+            <div class="gate-card single-cta">
+                <button class="primary-button spotify-login-trigger" type="button">Login via Spotify</button>
+            </div>
+        </div>
+
+        <section class="dashboard-hero content-blur">
+            <div class="hero-persona">
+                <div class="avatar-placeholder">PB</div>
+                <div class="hero-text">
+                    <p class="badge">Verbunden über dein Konto</p>
+                    <h1>Willkommen im Test-Dashboard</h1>
+                    <p class="lede">Sobald du dich via Spotify angemeldet hast, blenden wir dein echtes Profilbild und deine Kennzahlen ein.</p>
+                </div>
+            </div>
+            <div class="stats-stack">
+                <div class="stat-card">
+                    <span>Follower</span>
+                    <strong>—</strong>
+                </div>
+                <div class="stat-card">
+                    <span>Following</span>
+                    <strong>—</strong>
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <section class="workspace">
+        <aside class="side-nav">
+            <h3>Bereiche</h3>
+            <nav class="nav-stack" aria-label="Platzhalter Navigation">
+                <button type="button" class="nav-pill active" data-tab="welcome">Platzhalter 1</button>
+                <button type="button" class="nav-pill" data-tab="quicksearch">Platzhalter 2</button>
+                <button type="button" class="nav-pill" data-tab="links">Platzhalter 3</button>
+                <button type="button" class="nav-pill" data-tab="explore">Platzhalter 4</button>
+            </nav>
+        </aside>
+
+        <div class="main-panel content-blur" data-active-tab="welcome">
+            <div class="gate-overlay panel-gate">
+
+            </div>
+            <header class="panel-header">
+                <div>
+                    <p class="badge subtle" id="panel-badge">Dynamischer Bereich</p>
+                    <h2 id="panel-title">Inhalte werden hier geladen</h2>
+                    <p class="lede" id="panel-lede">Füge später Module hinzu, um Playlists, Analysen oder Aktionen anzuzeigen.</p>
+                </div>
+            </header>
+            <div class="panel-body">
+                <div class="placeholder-box" id="panel-placeholder">
+                    <p class="muted">Dieser Bereich wartet auf deine Inhalte. Nutze die Platzhalter links, um Abschnitte anzusteuern.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="js/page_script.js"></script>
+</body>
+</html>
