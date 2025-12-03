@@ -46,7 +46,7 @@ public class SpotifyController {
 
         ResponseCookie stateCookie = ResponseCookie.from("spotify_state", state)
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .sameSite("Lax")
                 .maxAge(Duration.ofMinutes(10))
                 .path("/")
@@ -80,7 +80,7 @@ public class SpotifyController {
 
         ResponseCookie deleteStateCookie = ResponseCookie.from("spotify_state", "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .sameSite("Lax")
                 .maxAge(0)
                 .path("/")

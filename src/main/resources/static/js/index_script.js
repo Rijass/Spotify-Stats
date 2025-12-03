@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         trigger.addEventListener('click', () => switchTab(trigger.dataset.tabTrigger));
     });
 
-    const apiBase = 'http://localhost:8080/api/users';
+    const apiBase = 'http://127.0.0.1:8080/api/users';
 
     const redirectToApp = () => {
         window.location.href = 'page.html';

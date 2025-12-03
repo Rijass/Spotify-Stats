@@ -60,7 +60,7 @@ public class UserController {
 
         ResponseCookie sessionCookie = ResponseCookie.from("sessionToken", authResponse.sessionToken())
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .sameSite("Lax")
                 .maxAge(Duration.ofDays(30))
                 .path("/")

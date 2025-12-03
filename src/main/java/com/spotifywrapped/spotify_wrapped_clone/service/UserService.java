@@ -14,8 +14,12 @@ import java.util.List;
 @Service
 public class UserService {
 
+
+    // === Constants ===
+    // Wie lange ein Session Token gespeichert wird
     private static final Duration SESSION_DURATION = Duration.ofDays(30);
 
+    //Zugriff auf diese Services, dbaccess
     private final UserDBaccess userDBaccess;
     private final SensitiveDataService sensitiveDataService;
 
