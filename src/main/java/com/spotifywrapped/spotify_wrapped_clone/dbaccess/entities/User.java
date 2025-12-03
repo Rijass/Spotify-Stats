@@ -28,6 +28,9 @@ public class User {
     @Column(name = "session_token", length = 512)
     private String sessionToken;
 
+    @Column(name = "session_expires_at")
+    private Instant sessionExpiresAt;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)
     private Instant createdAt;
@@ -82,5 +85,13 @@ public class User {
 
     public void setSessionToken(String sessionToken) {
         this.sessionToken = sessionToken;
+    }
+
+    public Instant getSessionExpiresAt() {
+        return sessionExpiresAt;
+    }
+
+    public void setSessionExpiresAt(Instant sessionExpiresAt) {
+        this.sessionExpiresAt = sessionExpiresAt;
     }
 }

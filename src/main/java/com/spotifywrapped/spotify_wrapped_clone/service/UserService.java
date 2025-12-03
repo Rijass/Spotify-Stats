@@ -7,9 +7,13 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.UserDtoOut;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.UserDBaccess;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 import org.springframework.stereotype.Service;
+import java.time.Duration;
+import java.time.Instant;
 
 @Service
 public class UserService {
+
+    private static final Duration SESSION_DURATION = Duration.ofDays(30);
 
     private final UserDBaccess userDBaccess;
     private final SensitiveDataService sensitiveDataService;
@@ -19,11 +23,14 @@ public class UserService {
         this.sensitiveDataService = sensitiveDataService;
     }
 
+    // === Public methods ===
+
     public UserDtoOut createUser(UserDtoIn userDtoIn) {
         User user = mapToEntity(userDtoIn);
         String rawSessionToken = ensureSessionToken(user);
         user.setPassword(sensitiveDataService.hashPassword(user.getPassword()));
         user.setSessionToken(sensitiveDataService.encrypt(user.getSessionToken()));
+        user.setSessionExpiresAt(calculateSessionExpiry());
         user.setSpotifyRefreshToken(sensitiveDataService.encrypt(user.getSpotifyRefreshToken()));
 
         userDBaccess.createUser(user);
@@ -63,9 +70,24 @@ public class UserService {
         }
 
         String rawSessionToken = sensitiveDataService.newSessionToken();
-        user.setSessionToken(sensitiveDataService.encrypt(rawSessionToken));
+        Instant sessionExpiresAt = calculateSessionExpiry();
+        userDBaccess.updateSession(user.getId(), sensitiveDataService.encrypt(rawSessionToken), sessionExpiresAt);
         return new AuthResponseDto(user.getId(), user.getUsername(), user.getEmail(), rawSessionToken);
     }
+
+    public boolean isSessionValid(String rawSessionToken) {
+        if (rawSessionToken == null || rawSessionToken.isBlank()) {
+            return false;
+        }
+
+        Instant now = Instant.now();
+        return userDBaccess.findActiveSessions(now).stream()
+                .map(User::getSessionToken)
+                .map(sensitiveDataService::decrypt)
+                .anyMatch(rawSessionToken::equals);
+    }
+
+    // === Helper methods ===
 
     private User mapToEntity(UserDtoIn dtoIn) {
         User user = new User();
@@ -95,5 +117,9 @@ public class UserService {
             user.setSessionToken(sessionToken);
         }
         return sessionToken;
+    }
+
+    private Instant calculateSessionExpiry() {
+        return Instant.now().plus(SESSION_DURATION);
     }
 }

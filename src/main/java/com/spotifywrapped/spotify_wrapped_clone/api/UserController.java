@@ -7,13 +7,11 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.UserDtoOut;
 import com.spotifywrapped.spotify_wrapped_clone.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import java.time.Duration;
+
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -59,6 +57,29 @@ public class UserController {
         if (authResponse == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(authResponse);
+
+        ResponseCookie sessionCookie = ResponseCookie.from("sessionToken", authResponse.sessionToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .maxAge(Duration.ofDays(30))
+                .path("/")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
+                .body(authResponse);
+    }
+
+    @GetMapping("/session")
+    public ResponseEntity<Void> validateSession(
+            @CookieValue(value = "sessionToken", required = false) String sessionToken) {
+        boolean valid = userService.isSessionValid(sessionToken);
+
+        if (!valid) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
+import java.time.Instant;
+import java.util.List;
 
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 
@@ -46,6 +48,10 @@ public class UserDBaccess {
             existingUser.setSessionToken(userUpdates.getSessionToken());
         }
 
+        if (userUpdates.getSessionExpiresAt() != null) {
+            existingUser.setSessionExpiresAt(userUpdates.getSessionExpiresAt());
+        }
+
         if (userUpdates.getSpotifyRefreshToken() != null) {
             existingUser.setSpotifyRefreshToken(userUpdates.getSpotifyRefreshToken());
         }
@@ -72,6 +78,25 @@ public class UserDBaccess {
                 .getResultStream()
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void updateSession(Long id, String encryptedSessionToken, Instant sessionExpiresAt) {
+        User existingUser = entityManager.find(User.class, id);
+
+        if (existingUser == null) {
+            return;
+        }
+
+        existingUser.setSessionToken(encryptedSessionToken);
+        existingUser.setSessionExpiresAt(sessionExpiresAt);
+    }
+
+    public List<User> findActiveSessions(Instant now) {
+        return entityManager.createQuery(
+                        "SELECT u FROM User u WHERE u.sessionToken IS NOT NULL AND u.sessionExpiresAt IS NOT NULL AND u.sessionExpiresAt > :now",
+                        User.class)
+                .setParameter("now", now)
+                .getResultList();
     }
 
 }

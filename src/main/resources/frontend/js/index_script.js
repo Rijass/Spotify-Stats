@@ -28,6 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiBase = 'http://localhost:8080/api/users';
 
+    const redirectToApp = () => {
+        window.location.href = 'page.html';
+    };
+
+    const checkExistingSession = async () => {
+        try {
+            const response = await fetch(`${apiBase}/session`, { credentials: 'include' });
+            if (response.ok) {
+                redirectToApp();
+            }
+        } catch (error) {
+            console.error('Session check failed', error);
+        }
+    };
+
     const showFeedback = (message) => {
         feedback.textContent = message;
         feedback.classList.add('show');
@@ -35,9 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleSuccess = (action) => {
         showFeedback(`${action} erfolgreich! Du wirst weitergeleitet ...`);
-        setTimeout(() => {
-            window.location.href = 'page.html';
-        }, 900);
+        setTimeout(redirectToApp, 900);
     };
 
     const persistSession = (data) => {
@@ -55,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -108,4 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showFeedback('Registrierung fehlgeschlagen. Bitte erneut versuchen.');
             });
     });
+
+    checkExistingSession();
 });
