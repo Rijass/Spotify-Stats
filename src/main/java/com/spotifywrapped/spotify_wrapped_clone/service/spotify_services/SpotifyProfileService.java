@@ -94,10 +94,7 @@ public class SpotifyProfileService {
         SpotifyAuthService.SpotifyTokenResponse tokenResponse =
                 spotifyAuthService.refreshAccessToken(tokens.refreshToken());
 
-        Instant expiresAt = spotifyTokenService.calculateAccessTokenExpiry(
-                tokenResponse.expiresIn(),
-                now
-        );
+        Instant expiresAt = spotifyTokenService.calculateAccessTokenExpiry(tokenResponse.expiresIn());
 
         // Tokens sicher in der DB aktualisieren
         spotifyTokenService.updateTokens(

@@ -90,8 +90,7 @@ public class SpotifyController {
 
         SpotifyAuthService.SpotifyTokenResponse tokenResponse = spotifyAuthService.exchangeCodeForToken(code);
         Instant expiresAt = spotifyTokenService.calculateAccessTokenExpiry(
-                tokenResponse.expiresIn(),
-                Instant.now()
+                tokenResponse.expiresIn()
         );
         spotifyTokenService.updateTokens(
                 user.getId(),

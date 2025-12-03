@@ -69,12 +69,11 @@ public class SpotifyTokenService {
         );
     }
 
-    public Instant calculateAccessTokenExpiry(Integer expiresIn, Instant referenceTime) {
+    public Instant calculateAccessTokenExpiry(Integer expiresIn) {
         int lifetime = expiresIn != null ? expiresIn : ACCESS_TOKEN_LIFETIME_SECONDS;
         int boundedLifetime = Math.min(lifetime, ACCESS_TOKEN_LIFETIME_SECONDS);
-        int ttl = Math.max(boundedLifetime - ACCESS_TOKEN_REFRESH_BUFFER_SECONDS, 0);
 
-        return referenceTime.plusSeconds(ttl);
+        return Instant.now().plusSeconds(boundedLifetime);
     }
 
     public record DecryptedSpotifyTokens(String refreshToken, String accessToken, Instant accessTokenExpiresAt) { }
