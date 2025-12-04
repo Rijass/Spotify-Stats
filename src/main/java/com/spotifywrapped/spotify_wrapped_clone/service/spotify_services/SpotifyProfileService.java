@@ -65,13 +65,14 @@ public class SpotifyProfileService {
 
         // Erstes Profilbild verwenden (Spotify gibt meist nur eins zurück)
         String imageUrl = (profile.images() != null && !profile.images().isEmpty())
-                ? profile.images().get(0).url()
+                ? profile.images().getFirst().url()
                 : null;
 
         return new SpotifyProfileDto(
                 profile.displayName(),
                 profile.followers().total(),
-                imageUrl
+                imageUrl,
+                profile.product()
         );
     }
 
@@ -113,7 +114,8 @@ public class SpotifyProfileService {
     public record SpotifyUserProfileResponse(
             @JsonProperty("display_name") String displayName,
             SpotifyFollowers followers,
-            List<SpotifyImage> images
+            List<SpotifyImage> images,
+            String product
     ) {}
 
     public record SpotifyFollowers(Integer total) {}

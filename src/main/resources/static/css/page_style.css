@@ -177,6 +177,14 @@ a {
     color: var(--muted);
     font-weight: 800;
     letter-spacing: 0.5px;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.avatar-placeholder.has-image {
+    border-color: transparent;
+    color: transparent;
 }
 
 .hero-text h1 {
@@ -326,6 +334,11 @@ a {
 .badge.subtle {
     background: rgba(255, 255, 255, 0.06);
     color: var(--muted);
+}
+
+.badge.account-plan {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .lede {

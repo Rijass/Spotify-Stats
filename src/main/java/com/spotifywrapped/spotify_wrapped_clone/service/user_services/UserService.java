@@ -113,6 +113,22 @@ public class UserService {
     }
 
     /**
+     * Entfernt die aktive Session eines Nutzers.
+     */
+    public void logout(String rawSessionToken) {
+        if (rawSessionToken == null || rawSessionToken.isBlank()) {
+            return;
+        }
+
+        Instant now = Instant.now();
+
+        userDBaccess.findActiveSessions(now).stream()
+                .filter(u -> sensitiveDataService.tokenMatches(rawSessionToken, u.getSessionToken()))
+                .findFirst()
+                .ifPresent(u -> userDBaccess.updateSession(u.getId(), null, null));
+    }
+
+    /**
      * Validiert ein Session Token (raw, also unverschlüsselt).
      */
     public boolean isSessionValid(String rawSessionToken) {

@@ -90,4 +90,25 @@ public class UserController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(value = "sessionToken", required = false) String sessionToken) {
+
+        if (sessionToken != null && !sessionToken.isBlank()) {
+            userService.logout(sessionToken);
+        }
+
+        ResponseCookie deleteCookie = ResponseCookie.from("sessionToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .maxAge(0)
+                .path("/")
+                .build();
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build();
+    }
 }
