@@ -78,8 +78,8 @@ public class UserService {
             return null;
         }
 
-        // Session Token entschlüsseln, um es zurückzugeben
-        String sessionToken = sensitiveDataService.decrypt(updatedUser.getSessionToken());
+        // Session Token
+        String sessionToken = updatedUser.getSessionToken();
 
         return mapToDto(updatedUser, sessionToken);
     }
