@@ -11,7 +11,6 @@ import java.time.Instant;
 public class SpotifyTokenService {
 
     private static final int ACCESS_TOKEN_LIFETIME_SECONDS = 3600;
-    private static final int ACCESS_TOKEN_REFRESH_BUFFER_SECONDS = 60;
 
     private final SpotifyTokenDBaccess spotifyTokenDBaccess;
     private final SensitiveDataService sensitiveDataService;
@@ -39,19 +38,6 @@ public class SpotifyTokenService {
         return token != null && token.getRefreshToken() != null && !token.getRefreshToken().isBlank();
     }
 
-    public void updateRefreshToken(Long userId, String refreshToken) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            return;
-        }
-
-        spotifyTokenDBaccess.createOrUpdateToken(
-                userId,
-                sensitiveDataService.encrypt(refreshToken),
-                null,
-                null
-        );
-    }
-
     public void updateTokens(Long userId, String refreshToken, String accessToken, Instant accessTokenExpiresAt) {
         if (accessToken == null || accessToken.isBlank() || accessTokenExpiresAt == null) {
             return;
@@ -69,11 +55,12 @@ public class SpotifyTokenService {
         );
     }
 
-    public Instant calculateAccessTokenExpiry(Integer expiresIn) {
-        int lifetime = expiresIn != null ? expiresIn : ACCESS_TOKEN_LIFETIME_SECONDS;
-        int boundedLifetime = Math.min(lifetime, ACCESS_TOKEN_LIFETIME_SECONDS);
+    public Instant calculateAccessTokenExpiry(Integer expiresInSeconds) {
+        int lifetime = (expiresInSeconds != null && expiresInSeconds > 0)
+                ? expiresInSeconds
+                : ACCESS_TOKEN_LIFETIME_SECONDS;
 
-        return Instant.now().plusSeconds(boundedLifetime);
+        return Instant.now().plusSeconds(lifetime);
     }
 
     public record DecryptedSpotifyTokens(String refreshToken, String accessToken, Instant accessTokenExpiresAt) { }
