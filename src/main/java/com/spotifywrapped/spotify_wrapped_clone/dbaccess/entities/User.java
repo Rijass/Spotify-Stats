@@ -1,7 +1,7 @@
 package com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -22,8 +22,17 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private SpotifyToken spotifyToken;
+
+    @Column(name = "session_token", length = 512)
+    private String sessionToken;
+
+    @Column(name = "session_expires_at")
+    private Instant sessionExpiresAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
     private Instant createdAt;
 
     public Long getId() {
@@ -62,8 +71,27 @@ public class User {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    public SpotifyToken getSpotifyToken() {
+        return spotifyToken;
     }
 
+    public void setSpotifyToken(SpotifyToken spotifyToken) {
+        this.spotifyToken = spotifyToken;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
+    }
+
+    public Instant getSessionExpiresAt() {
+        return sessionExpiresAt;
+    }
+
+    public void setSessionExpiresAt(Instant sessionExpiresAt) {
+        this.sessionExpiresAt = sessionExpiresAt;
+    }
 }

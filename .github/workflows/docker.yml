@@ -1,0 +1,40 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    # Verwendet ENVIRONMENT, damit vars.* & secrets.* geladen werden
+    environment: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate .env from GitHub Secrets + Variables
+        run: |
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> .env
+          echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> .env
+
+          echo "MYSQL_DATABASE=${{ vars.MYSQL_DATABASE }}" >> .env
+          echo "MYSQL_USER=${{ vars.MYSQL_USER }}" >> .env
+          echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
+          echo "DB_USER=${{ vars.DB_USER }}" >> .env
+          echo "SERVER_PORT=${{ vars.SERVER_PORT }}" >> .env
+          echo "SPOTIFY_SCOPES=${{ vars.SPOTIFY_SCOPES }}" >> .env
+          echo "SPOTIFY_REDIRECT_URI=${{ vars.SPOTIFY_REDIRECT_URI }}" >> .env
+
+      - name: Show generated .env (masked)
+        run: cat .env
+
+      - name: Start Docker Compose
+        run: docker compose up -d --build

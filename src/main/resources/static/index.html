@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Tracker | Login</title>
+    <link rel="stylesheet" href="css/index_style.css">
+</head>
+<body>
+<header class="top-bar">
+    <div class="logo">
+        <span class="logo-icon">🎧</span>
+        <span class="logo-text">Spotify Tracker</span>
+    </div>
+</header>
+<main class="layout">
+    <section class="auth-stack">
+        <h1>Willkommen zurück</h1>
+        <p class="lede">Melde dich an oder registriere dich, um fortzufahren.</p>
+    </section>
+
+    <section class="auth-card">
+        <div class="tab-switcher" role="tablist">
+            <button class="tab-button active" data-tab="login" aria-selected="true">Login</button>
+            <button class="tab-button" data-tab="register" aria-selected="false">Registrieren</button>
+        </div>
+
+        <form id="login-form" class="form active" aria-label="Login Formular">
+            <div class="form-group">
+                <label for="login-identifier">Nutzername oder E-Mail</label>
+                <input type="text" id="login-identifier" name="identifier" placeholder="Username / E-Mail" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Passwort</label>
+                <input type="password" id="login-password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="primary-button">Login</button>
+            <p class="helper-text">Noch kein Konto? <button class="link-button" data-tab-trigger="register" type="button">Jetzt registrieren</button></p>
+        </form>
+
+        <form id="register-form" class="form" aria-label="Registrierungs Formular">
+            <div class="form-group">
+                <label for="register-username">Nutzername</label>
+                <input type="text" id="register-username" name="username" placeholder="Username " required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">E-Mail</label>
+                <input type="email" id="register-email" name="email" placeholder="max@musterman.de" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Passwort</label>
+                <input type="password" id="register-password" name="password" placeholder="Mindestens 8 Zeichen" required>
+            </div>
+            <button type="submit" class="primary-button">Registrieren</button>
+            <p class="helper-text">Schon registriert? <button class="link-button" data-tab-trigger="login" type="button">Zum Login</button></p>
+        </form>
+
+        <div id="form-feedback" class="form-feedback" role="status" aria-live="polite"></div>
+    </section>
+</main>
+
+<script src="js/index_script.js"></script>
+</body>
+</html>
