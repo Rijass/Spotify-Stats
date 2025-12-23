@@ -28,19 +28,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiBase = 'http://127.0.0.1:8080/api/users';
 
+    const tokenKey = 'spotify-tracker-token';
+
+    const getAccessToken = () => localStorage.getItem(tokenKey);
+
     const redirectToApp = () => {
         window.location.href = 'page.html';
     };
 
     const checkExistingSession = async () => {
+
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+            return;
+        }
+
         try {
-            const response = await fetch(`${apiBase}/session`, { credentials: 'include' });
+            const response = await fetch(`${apiBase}/session`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
             if (response.ok) {
                 redirectToApp();
             }
             if (response.status === 401) {
                 localStorage.removeItem('spotify-tracker-id');
                 localStorage.removeItem('spotify-tracker-user');
+                localStorage.removeItem(tokenKey);
                 console.log('Session expired');
             }
         } catch (error) {
@@ -65,6 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data?.username) {
             localStorage.setItem('spotify-tracker-user', data.username);
         }
+        if (data?.accessToken) {
+            localStorage.setItem(tokenKey, data.accessToken);
+        }
     };
 
     const postJson = async (path, payload) => {
@@ -73,8 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload),
-            credentials: 'include'
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {

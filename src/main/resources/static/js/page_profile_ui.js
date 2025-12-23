@@ -57,7 +57,16 @@
     };
 
     const fetchSpotifyProfile = async (apiBase) => {
-        const response = await fetch(`${apiBase}/spotify/profile`, { credentials: 'include' });
+        const accessToken = localStorage.getItem('spotify-tracker-token');
+        if (!accessToken) {
+            return null;
+        }
+
+        const response = await fetch(`${apiBase}/spotify/profile`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
         if (!response.ok) {
             return null;
         }

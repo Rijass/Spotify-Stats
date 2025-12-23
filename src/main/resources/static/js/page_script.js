@@ -70,6 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiBase = 'http://127.0.0.1:8080/api';
 
+    const tokenKey = 'spotify-tracker-token';
+
+    const getAccessToken = () => localStorage.getItem(tokenKey);
+
     const unlockDashboard = () => {
         root.classList.remove('locked');
         gates.forEach((gate) => gate.classList.add('dismissed'));
@@ -81,7 +85,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const ensureSession = async () => {
-        const response = await fetch(`${apiBase}/users/session`, { credentials: 'include' });
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+            window.location.href = 'index.html';
+            return false;
+        }
+
+        const response = await fetch(`${apiBase}/users/session`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
         if (!response.ok) {
             window.location.href = 'index.html';
             return false;
@@ -90,7 +104,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const checkSpotifyStatus = async () => {
-        const response = await fetch(`${apiBase}/spotify/status`, { credentials: 'include' });
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+            keepLocked();
+            return false;
+        }
+
+        const response = await fetch(`${apiBase}/spotify/status`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
         if (!response.ok) {
             keepLocked();
             return false;
@@ -119,19 +143,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     spotifyButtons.forEach((button) => {
         button.addEventListener('click', () => {
-            window.location.href = `${apiBase}/spotify/login`;
+            const accessToken = getAccessToken();
+            if (!accessToken) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            fetch(`${apiBase}/spotify/login`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Spotify Login fehlgeschlagen.');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data?.authorizationUrl) {
+                        window.location.href = data.authorizationUrl;
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    keepLocked();
+                });
         });
     });
 
     const handleLogout = async () => {
+        const accessToken = getAccessToken();
         try {
             await fetch(`${apiBase}/users/logout`, {
                 method: 'POST',
-                credentials: 'include'
+                headers: accessToken
+                    ? { Authorization: `Bearer ${accessToken}` }
+                    : {}
             });
         } finally {
             localStorage.removeItem('spotify-tracker-id');
             localStorage.removeItem('spotify-tracker-user');
+            localStorage.removeItem(tokenKey);
             window.location.href = 'index.html';
         }
     };
