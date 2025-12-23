@@ -1,3 +1,7 @@
+import { API_BASE, USERS_API_BASE } from './modules/api.js';
+import { clearSession, getAccessToken } from './modules/session.js';
+import { loadProfile } from './modules/spotify_profile_ui.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const spotifyButtons = Array.from(document.querySelectorAll('.spotify-login-trigger'));
     const root = document.body;
@@ -68,12 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const apiBase = 'http://127.0.0.1:8080/api';
-
-    const tokenKey = 'spotify-tracker-token';
-
-    const getAccessToken = () => localStorage.getItem(tokenKey);
-
     const unlockDashboard = () => {
         root.classList.remove('locked');
         gates.forEach((gate) => gate.classList.add('dismissed'));
@@ -91,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        const response = await fetch(`${apiBase}/users/session`, {
+        const response = await fetch(`${USERS_API_BASE}/session`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
@@ -110,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        const response = await fetch(`${apiBase}/spotify/status`, {
+        const response = await fetch(`${API_BASE}/spotify/status`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
@@ -123,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { connected } = await response.json();
         if (connected) {
             unlockDashboard();
-            await window.SpotifyProfileUI?.loadProfile(apiBase);
+            await loadProfile(API_BASE);
             return true;
         } else {
             keepLocked();
@@ -149,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            fetch(`${apiBase}/spotify/login`, {
+            fetch(`${API_BASE}/spotify/login`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -173,20 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const handleLogout = async () => {
-        const accessToken = getAccessToken();
-        try {
-            await fetch(`${apiBase}/users/logout`, {
-                method: 'POST',
-                headers: accessToken
-                    ? { Authorization: `Bearer ${accessToken}` }
-                    : {}
-            });
-        } finally {
-            localStorage.removeItem('spotify-tracker-id');
-            localStorage.removeItem('spotify-tracker-user');
-            localStorage.removeItem(tokenKey);
-            window.location.href = 'index.html';
-        }
+        clearSession();
+        window.location.href = 'index.html';
     };
 
     if (logoutButton) {
@@ -201,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('connected') === 'spotify') {
             unlockDashboard();
-            window.SpotifyProfileUI?.loadProfile(apiBase);
+            loadProfile(API_BASE);
             urlParams.delete('connected');
             const url = new URL(window.location.href);
             url.search = urlParams.toString();

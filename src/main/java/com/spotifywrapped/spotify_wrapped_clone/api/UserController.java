@@ -70,18 +70,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(
-            @RequestHeader(value = "Authorization", required = false) String authorization) {
-
-        String token = extractBearerToken(authorization);
-        if (token != null && !token.isBlank()) {
-            userService.logout(token);
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
     private String extractBearerToken(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             return null;

@@ -1,3 +1,6 @@
+import { USERS_API_BASE } from './modules/api.js';
+import { clearSession, getAccessToken, persistSession } from './modules/session.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-button');
     const forms = document.querySelectorAll('.form');
@@ -26,12 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         trigger.addEventListener('click', () => switchTab(trigger.dataset.tabTrigger));
     });
 
-    const apiBase = 'http://127.0.0.1:8080/api/users';
-
-    const tokenKey = 'spotify-tracker-token';
-
-    const getAccessToken = () => localStorage.getItem(tokenKey);
-
     const redirectToApp = () => {
         window.location.href = 'page.html';
     };
@@ -44,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`${apiBase}/session`, {
+            const response = await fetch(`${USERS_API_BASE}/session`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -53,9 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 redirectToApp();
             }
             if (response.status === 401) {
-                localStorage.removeItem('spotify-tracker-id');
-                localStorage.removeItem('spotify-tracker-user');
-                localStorage.removeItem(tokenKey);
+                clearSession();
                 console.log('Session expired');
             }
         } catch (error) {
@@ -73,20 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(redirectToApp, 900);
     };
 
-    const persistSession = (data) => {
-        if (data?.id) {
-            localStorage.setItem('spotify-tracker-id', data.id);
-        }
-        if (data?.username) {
-            localStorage.setItem('spotify-tracker-user', data.username);
-        }
-        if (data?.accessToken) {
-            localStorage.setItem(tokenKey, data.accessToken);
-        }
-    };
-
     const postJson = async (path, payload) => {
-        const response = await fetch(`${apiBase}${path}`, {
+        const response = await fetch(`${USERS_API_BASE}${path}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

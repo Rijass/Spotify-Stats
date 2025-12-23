@@ -88,11 +88,6 @@ public class UserService {
         return new AuthResponseDto(user.getId(), user.getUsername(), user.getEmail(), accessToken);
     }
 
-
-    public void logout(String accessToken) {
-        // Stateless JWTs: nothing to invalidate server-side.
-    }
-
     public boolean isAccessTokenValid(String accessToken) {
         return jwtService.parseUserId(accessToken) != null;
     }
