@@ -1,3 +1,6 @@
+import { USERS_API_BASE } from './modules/api.js';
+import { clearSession, getAccessToken, persistSession } from './modules/session.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-button');
     const forms = document.querySelectorAll('.form');
@@ -26,21 +29,28 @@ document.addEventListener('DOMContentLoaded', () => {
         trigger.addEventListener('click', () => switchTab(trigger.dataset.tabTrigger));
     });
 
-    const apiBase = 'http://127.0.0.1:8080/api/users';
-
     const redirectToApp = () => {
         window.location.href = 'page.html';
     };
 
     const checkExistingSession = async () => {
+
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+            return;
+        }
+
         try {
-            const response = await fetch(`${apiBase}/session`, { credentials: 'include' });
+            const response = await fetch(`${USERS_API_BASE}/session`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
             if (response.ok) {
                 redirectToApp();
             }
             if (response.status === 401) {
-                localStorage.removeItem('spotify-tracker-id');
-                localStorage.removeItem('spotify-tracker-user');
+                clearSession();
                 console.log('Session expired');
             }
         } catch (error) {
@@ -58,23 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(redirectToApp, 900);
     };
 
-    const persistSession = (data) => {
-        if (data?.id) {
-            localStorage.setItem('spotify-tracker-id', data.id);
-        }
-        if (data?.username) {
-            localStorage.setItem('spotify-tracker-user', data.username);
-        }
-    };
-
     const postJson = async (path, payload) => {
-        const response = await fetch(`${apiBase}${path}`, {
+        const response = await fetch(`${USERS_API_BASE}${path}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload),
-            credentials: 'include'
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {

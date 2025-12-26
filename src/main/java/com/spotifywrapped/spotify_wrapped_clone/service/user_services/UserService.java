@@ -6,22 +6,12 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoIn;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoOut;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.UserDBaccess;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
+import com.spotifywrapped.spotify_wrapped_clone.service.JwtService;
 import com.spotifywrapped.spotify_wrapped_clone.service.SensitiveDataService;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.Instant;
-
 @Service
 public class UserService {
-
-    // ============================================================
-    //                  Constants
-    // ============================================================
-
-    /** Dauer, wie lange ein Session-Token gültig bleibt */
-    private static final Duration SESSION_DURATION = Duration.ofDays(30);
-
 
     // ============================================================
     //                  Dependencies
@@ -29,12 +19,13 @@ public class UserService {
 
     private final UserDBaccess userDBaccess;
     private final SensitiveDataService sensitiveDataService;
+    private final JwtService jwtService;
 
-    public UserService(UserDBaccess userDBaccess, SensitiveDataService sensitiveDataService) {
+    public UserService(UserDBaccess userDBaccess, SensitiveDataService sensitiveDataService, JwtService jwtService) {
         this.userDBaccess = userDBaccess;
         this.sensitiveDataService = sensitiveDataService;
+        this.jwtService = jwtService;
     }
-
 
 
     // ============================================================
@@ -47,17 +38,13 @@ public class UserService {
     public UserDtoOut createUser(UserDtoIn userDtoIn) {
         User user = mapToEntity(userDtoIn);
 
-        // Session Token sicherstellen (falls der Client kein mitgegeben hat)
-        String rawSessionToken = ensureSessionToken(user);
-
-        // Passwort & Tokens verschlüsseln
+        // Passwort verschlüsseln
         user.setPassword(sensitiveDataService.hashPassword(user.getPassword()));
-        user.setSessionToken(sensitiveDataService.hashToken(user.getSessionToken()));
-        user.setSessionExpiresAt(calculateSessionExpiry());
 
         userDBaccess.createUser(user);
 
-        return mapToDto(user, rawSessionToken);
+        String accessToken = jwtService.generateAccessToken(user);
+        return mapToDto(user, accessToken);
     }
 
     /**
@@ -69,19 +56,13 @@ public class UserService {
         if (userUpdates.getPassword() != null) {
             userUpdates.setPassword(sensitiveDataService.hashPassword(userUpdates.getPassword()));
         }
-        if (userUpdates.getSessionToken() != null) {
-            userUpdates.setSessionToken(sensitiveDataService.encrypt(userUpdates.getSessionToken()));
-        }
 
         User updatedUser = userDBaccess.updateUser(id, userUpdates);
         if (updatedUser == null) {
             return null;
         }
 
-        // Session Token
-        String sessionToken = updatedUser.getSessionToken();
-
-        return mapToDto(updatedUser, sessionToken);
+        return mapToDto(updatedUser, null);
     }
 
     /**
@@ -102,62 +83,26 @@ public class UserService {
             return null;
         }
 
-        // Session Token erzeugen und speichern
-        String rawSessionToken = sensitiveDataService.newSessionToken();
-        Instant sessionExpiresAt = calculateSessionExpiry();
-        String hashedToken = sensitiveDataService.hashToken(rawSessionToken);
+        String accessToken = jwtService.generateAccessToken(user);
 
-        userDBaccess.updateSession(user.getId(), hashedToken, sessionExpiresAt);
-
-        return new AuthResponseDto(user.getId(), user.getUsername(), user.getEmail(), rawSessionToken);
+        return new AuthResponseDto(user.getId(), user.getUsername(), user.getEmail(), accessToken);
     }
 
-    /**
-     * Entfernt die aktive Session eines Nutzers.
-     */
-    public void logout(String rawSessionToken) {
-        if (rawSessionToken == null || rawSessionToken.isBlank()) {
-            return;
-        }
-
-        Instant now = Instant.now();
-
-        userDBaccess.findActiveSessions(now).stream()
-                .filter(u -> sensitiveDataService.tokenMatches(rawSessionToken, u.getSessionToken()))
-                .findFirst()
-                .ifPresent(u -> userDBaccess.updateSession(u.getId(), null, null));
+    public boolean isAccessTokenValid(String accessToken) {
+        return jwtService.parseUserId(accessToken) != null;
     }
 
-    /**
-     * Validiert ein Session Token (raw, also unverschlüsselt).
-     */
-    public boolean isSessionValid(String rawSessionToken) {
-        if (rawSessionToken == null || rawSessionToken.isBlank()) {
-            return false;
-        }
-
-        Instant now = Instant.now();
-
-        return userDBaccess.findActiveSessions(now).stream()
-                .anyMatch(u -> sensitiveDataService.tokenMatches(rawSessionToken, u.getSessionToken()));
-    }
-
-    /**
-     * Findet den User anhand eines gültigen Session Tokens.
-     */
-    public User findUserBySessionToken(String rawSessionToken) {
-        if (rawSessionToken == null || rawSessionToken.isBlank()) {
+    public User findUserByAccessToken(String accessToken) {
+        Long userId = jwtService.parseUserId(accessToken);
+        if (userId == null) {
             return null;
         }
-
-        Instant now = Instant.now();
-
-        return userDBaccess.findActiveSessions(now).stream()
-                .filter(u -> sensitiveDataService.tokenMatches(rawSessionToken, u.getSessionToken()))
-                .findFirst()
-                .orElse(null);
+        return userDBaccess.findUserById(userId);
     }
 
+    public User findUserById(Long id) {
+        return userDBaccess.findUserById(id);
+    }
 
 
     // ============================================================
@@ -172,42 +117,19 @@ public class UserService {
         user.setUsername(dtoIn.username());
         user.setEmail(dtoIn.email());
         user.setPassword(dtoIn.password());
-        user.setSessionToken(dtoIn.sessionToken());
         return user;
     }
 
     /**
-     * Mappt Entity → DTO (mit entschlüsseltem Session Token und Spotify Token).
+     * Mappt Entity → DTO (inkl. Access Token).
      */
-    private UserDtoOut mapToDto(User user, String rawSessionToken) {
+    private UserDtoOut mapToDto(User user, String accessToken) {
         return new UserDtoOut(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getCreatedAt(),
-                rawSessionToken
+                accessToken
         );
-    }
-
-    /**
-     * Stellt sicher, dass der User ein Session Token hat.
-     * Falls nicht → neues generieren.
-     */
-    private String ensureSessionToken(User user) {
-        String sessionToken = user.getSessionToken();
-
-        if (sessionToken == null || sessionToken.isBlank()) {
-            sessionToken = sensitiveDataService.newSessionToken();
-            user.setSessionToken(sessionToken);
-        }
-
-        return sessionToken;
-    }
-
-    /**
-     * Berechnet Ablaufzeitpunkt einer Session.
-     */
-    private Instant calculateSessionExpiry() {
-        return Instant.now().plus(SESSION_DURATION);
     }
 }

@@ -22,14 +22,8 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private SpotifyToken spotifyToken;
-
-    @Column(name = "session_token", length = 512)
-    private String sessionToken;
-
-    @Column(name = "session_expires_at")
-    private Instant sessionExpiresAt;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)
@@ -77,21 +71,5 @@ public class User {
 
     public void setSpotifyToken(SpotifyToken spotifyToken) {
         this.spotifyToken = spotifyToken;
-    }
-
-    public String getSessionToken() {
-        return sessionToken;
-    }
-
-    public void setSessionToken(String sessionToken) {
-        this.sessionToken = sessionToken;
-    }
-
-    public Instant getSessionExpiresAt() {
-        return sessionExpiresAt;
-    }
-
-    public void setSessionExpiresAt(Instant sessionExpiresAt) {
-        this.sessionExpiresAt = sessionExpiresAt;
     }
 }

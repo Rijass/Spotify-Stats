@@ -7,9 +7,6 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoOut;
 import com.spotifywrapped.spotify_wrapped_clone.service.user_services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import java.time.Duration;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -26,11 +23,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDtoOut> createUser(@RequestBody UserDtoIn userDtoIn) {
         UserDtoOut user = userService.createUser(userDtoIn);
-        ResponseCookie sessionCookie = buildSessionCookie(user.sessionToken());
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
-                .body(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PutMapping("/{id}")
@@ -62,27 +55,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ResponseCookie sessionCookie = buildSessionCookie(authResponse.sessionToken());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
-                .body(authResponse);
-    }
-
-    private ResponseCookie buildSessionCookie(String sessionToken) {
-        return ResponseCookie.from("sessionToken", sessionToken)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .maxAge(Duration.ofDays(30))
-                .path("/")
-                .build();
+        return ResponseEntity.ok(authResponse);
     }
 
     @GetMapping("/session")
     public ResponseEntity<Void> validateSession(
-            @CookieValue(value = "sessionToken", required = false) String sessionToken) {
-        boolean valid = userService.isSessionValid(sessionToken);
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        boolean valid = userService.isAccessTokenValid(extractBearerToken(authorization));
 
         if (!valid) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -91,24 +70,10 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(
-            @CookieValue(value = "sessionToken", required = false) String sessionToken) {
-
-        if (sessionToken != null && !sessionToken.isBlank()) {
-            userService.logout(sessionToken);
+    private String extractBearerToken(String authorization) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return null;
         }
-
-        ResponseCookie deleteCookie = ResponseCookie.from("sessionToken", "")
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .maxAge(0)
-                .path("/")
-                .build();
-
-        return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
-                .build();
+        return authorization.substring("Bearer ".length()).trim();
     }
 }
