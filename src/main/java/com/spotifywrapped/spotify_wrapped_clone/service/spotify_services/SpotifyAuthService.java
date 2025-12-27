@@ -72,6 +72,13 @@ public class SpotifyAuthService {
         return requestToken(body);
     }
 
+    public SpotifyTokenResponse requestClientCredentialsToken() {
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "client_credentials");
+
+        return requestToken(body);
+    }
+
     public String getSuccessRedirect() {
         return successRedirect;
     }
