@@ -20,6 +20,9 @@ jobs:
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "APP_CRYPTO_PASSWORD=${{ secrets.APP_CRYPTO_PASSWORD }}" >> .env
+          echo "APP_CRYPTO_SALT=${{ secrets.APP_CRYPTO_SALT }}" >> .env
+          echo "APP_JWT_SECRET=${{ secrets.APP_JWT_SECRET }}" >> .env
           echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> .env
           echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> .env
 
@@ -35,6 +38,9 @@ jobs:
 
       - name: Show generated .env (masked)
         run: cat .env
+
+      - name: Run unit tests
+        run: ./mvnw -B test
 
       - name: Start Docker Compose
         run: docker compose up -d --build

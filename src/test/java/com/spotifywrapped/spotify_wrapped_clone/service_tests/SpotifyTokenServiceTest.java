@@ -1,4 +1,4 @@
-package com.spotifywrapped.spotify_wrapped_clone;
+package com.spotifywrapped.spotify_wrapped_clone.service_tests;
 
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.SpotifyTokenDBaccess;
 import com.spotifywrapped.spotify_wrapped_clone.service.SensitiveDataService;
