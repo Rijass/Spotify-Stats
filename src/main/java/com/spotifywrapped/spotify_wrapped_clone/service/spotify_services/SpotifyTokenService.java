@@ -2,7 +2,7 @@ package com.spotifywrapped.spotify_wrapped_clone.service.spotify_services;
 
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.SpotifyTokenDBaccess;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.SpotifyToken;
-import com.spotifywrapped.spotify_wrapped_clone.service.SensitiveDataService;
+import com.spotifywrapped.spotify_wrapped_clone.service.Security.SensitiveDataService;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;

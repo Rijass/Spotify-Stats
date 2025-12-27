@@ -1,4 +1,4 @@
-package com.spotifywrapped.spotify_wrapped_clone.service;
+package com.spotifywrapped.spotify_wrapped_clone.service.Security;
 
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;

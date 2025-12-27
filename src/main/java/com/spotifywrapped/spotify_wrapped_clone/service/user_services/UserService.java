@@ -6,8 +6,8 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoIn;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.userdto.UserDtoOut;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.UserDBaccess;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
-import com.spotifywrapped.spotify_wrapped_clone.service.JwtService;
-import com.spotifywrapped.spotify_wrapped_clone.service.SensitiveDataService;
+import com.spotifywrapped.spotify_wrapped_clone.service.Security.JwtService;
+import com.spotifywrapped.spotify_wrapped_clone.service.Security.SensitiveDataService;
 import org.springframework.stereotype.Service;
 
 @Service

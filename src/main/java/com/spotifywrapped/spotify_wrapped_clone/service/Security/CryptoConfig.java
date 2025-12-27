@@ -1,4 +1,4 @@
-package com.spotifywrapped.spotify_wrapped_clone.service;
+package com.spotifywrapped.spotify_wrapped_clone.service.Security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,7 @@
 package com.spotifywrapped.spotify_wrapped_clone;
 
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.SpotifyTokenDBaccess;
-import com.spotifywrapped.spotify_wrapped_clone.service.SensitiveDataService;
+import com.spotifywrapped.spotify_wrapped_clone.service.Security.SensitiveDataService;
 import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

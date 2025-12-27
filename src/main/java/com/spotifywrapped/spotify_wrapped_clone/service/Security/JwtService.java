@@ -1,4 +1,4 @@
-package com.spotifywrapped.spotify_wrapped_clone.service;
+package com.spotifywrapped.spotify_wrapped_clone.service.Security;
 
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 import io.jsonwebtoken.Claims;
