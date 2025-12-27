@@ -41,29 +41,37 @@
     </section>
 
     <section class="workspace">
-        <div class="side-nav content-blur" data-active-tab="welcome">
+        <div class="side-nav content-blur" data-active-tab="charts">
         <aside class="side-nav">
             <h3>Bereiche</h3>
             <nav class="nav-stack" aria-label="Platzhalter Navigation">
-                <button type="button" class="nav-pill active" data-tab="welcome">Platzhalter 1</button>
-                <button type="button" class="nav-pill" data-tab="quicksearch">Platzhalter 2</button>
-                <button type="button" class="nav-pill" data-tab="links">Platzhalter 3</button>
-                <button type="button" class="nav-pill" data-tab="explore">Platzhalter 4</button>
+                <button type="button" class="nav-pill active" data-tab="charts">Global Top 50</button>
+                <button type="button" class="nav-pill" data-tab="welcome">Übersicht</button>
             </nav>
         </aside>
         </div>
-        <div class="main-panel content-blur" data-active-tab="welcome">
+        <div class="main-panel content-blur" data-active-tab="charts">
             <header class="panel-header">
                 <div>
-                    <p class="badge subtle" id="panel-badge">Dynamischer Bereich</p>
-                    <h2 id="panel-title">Inhalte werden hier geladen</h2>
-                    <p class="lede" id="panel-lede">Füge später Module hinzu, um Playlists, Analysen oder Aktionen anzuzeigen.</p>
+                    <p class="badge subtle" id="panel-badge">Charts</p>
+                    <h2 id="panel-title">Global Top 50</h2>
+                    <p class="lede" id="panel-lede">Die aktuellsten 50 Songs der Spotify Global Top 50 Playlist.</p>
                 </div>
             </header>
             <div class="panel-body">
-                <div class="placeholder-box" id="panel-placeholder">
-                    <p class="muted">Dieser Bereich wartet auf deine Inhalte. Nutze die Platzhalter links, um Abschnitte anzusteuern.</p>
-                </div>
+                <section class="chart-section" id="chart-section">
+                    <div class="chart-header">
+                        <div>
+                            <p class="muted chart-date" id="chart-date">Snapshot wird geladen …</p>
+                            <h3>Top 10</h3>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="ghost-button" id="chart-refresh" type="button">Aktualisieren</button>
+                            <button class="primary-button" id="chart-toggle" type="button">Mehr anzeigen</button>
+                        </div>
+                    </div>
+                    <ol class="chart-list" id="chart-list"></ol>
+                </section>
             </div>
         </div>
     </section>

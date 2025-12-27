@@ -1,6 +1,7 @@
 import { API_BASE, USERS_API_BASE } from './modules/api.js';
 import { clearSession, getAccessToken } from './modules/session.js';
 import { loadProfile } from './modules/spotify_profile_ui.js';
+import { initChartUi } from './modules/chart_ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const spotifyButtons = Array.from(document.querySelectorAll('.spotify-login-trigger'));
@@ -10,35 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const panel = document.querySelector('.main-panel');
     const panelTitle = document.getElementById('panel-title');
     const panelLede = document.getElementById('panel-lede');
-    const panelPlaceholder = document.getElementById('panel-placeholder');
     const panelBadge = document.getElementById('panel-badge');
     const logoutButton = document.getElementById('logout-button');
 
     const tabContent = {
+        charts: {
+            title: 'Global Top 50',
+            lede: 'Die aktuellsten 50 Songs der globalen Spotify Charts.',
+            placeholder: '',
+            badge: 'Charts'
+        },
         welcome: {
             title: 'Willkommen',
             lede: 'Starte hier, um dein Spotify-Profil und deine Statistiken einzusehen.',
             placeholder: 'Sobald du verbunden bist, siehst du hier dein persönliches Dashboard.',
             badge: 'Übersicht'
         },
-        quicksearch: {
-            title: 'Schnellsuche',
-            lede: 'Finde schnell Playlists, Tracks oder Künstler, sobald du angemeldet bist.',
-            placeholder: 'Nutze die Suche, um Inhalte aus deinem Spotify-Konto zu laden.',
-            badge: 'Suche'
-        },
-        links: {
-            title: 'Links & Aktionen',
-            lede: 'Verwalte deine Shortcuts und Aktionen, die du häufig brauchst.',
-            placeholder: 'Hier erscheinen deine Aktionen, sobald du sie hinterlegt hast.',
-            badge: 'Aktionen'
-        },
-        explore: {
-            title: 'Entdecken',
-            lede: 'Lass dir Empfehlungen und Analysen anzeigen, wenn dein Konto verbunden ist.',
-            placeholder: 'Empfehlungen und Trends warten hier auf dich.',
-            badge: 'Explore'
-        }
     };
 
     const setActiveTab = (tabKey, updateUrl = true) => {
@@ -57,9 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (panelLede) {
             panelLede.textContent = content.lede;
-        }
-        if (panelPlaceholder) {
-            panelPlaceholder.querySelector('.muted').textContent = content.placeholder;
         }
         if (panelBadge) {
             panelBadge.textContent = content.badge;
@@ -129,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const initialTab = new URLSearchParams(window.location.search).get('tab') || 'welcome';
+    const initialTab = new URLSearchParams(window.location.search).get('tab') || 'charts';
     setActiveTab(initialTab, false);
 
     navPills.forEach((pill) => {
@@ -195,5 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             checkSpotifyStatus();
         }
+
+        initChartUi();
     });
 });
