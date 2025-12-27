@@ -65,6 +65,10 @@ public class ChartService {
         return chartSnapshotDBaccess.findLatestSnapshot(GLOBAL_TOP_50_KEY);
     }
 
+    public String getGlobalTop50PlaylistId() {
+        return spotifyChartClient.getGlobalTop50PlaylistId();
+    }
+
     public List<ChartEntry> findEntriesForSnapshot(Long snapshotId, Integer limit) {
         return chartSnapshotDBaccess.findEntriesForSnapshot(snapshotId, limit);
     }

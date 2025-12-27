@@ -28,6 +28,11 @@ public class SpotifyChartClient {
         this.spotifyAuthService = spotifyAuthService;
     }
 
+    public String getGlobalTop50PlaylistId() {
+        return globalTop50PlaylistId;
+    }
+
+
     public List<TrackItem> fetchGlobalTop50() {
         SpotifyAuthService.SpotifyTokenResponse tokenResponse = spotifyAuthService.requestClientCredentialsToken();
         String playlistUrl = "https://api.spotify.com/v1/playlists/" + globalTop50PlaylistId + "/tracks?limit=50";

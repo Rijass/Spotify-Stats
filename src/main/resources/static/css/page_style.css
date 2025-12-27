@@ -349,6 +349,21 @@ a {
     font-weight: 700;
 }
 
+.overview-placeholder {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--border);
+    border-radius: calc(var(--radius) - 8px);
+    padding: 18px;
+    margin-top: 12px;
+}
+
+.overview-placeholder .placeholder-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px;
+}
+
 .primary-button {
     border: none;
     background: linear-gradient(135deg, var(--spotify-green), #1aa34a);

@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const panelTitle = document.getElementById('panel-title');
     const panelLede = document.getElementById('panel-lede');
     const panelBadge = document.getElementById('panel-badge');
+    const chartSection = document.getElementById('chart-section');
+    const overviewPlaceholder = document.getElementById('overview-placeholder');
     const logoutButton = document.getElementById('logout-button');
 
     const tabContent = {
@@ -48,6 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (panelBadge) {
             panelBadge.textContent = content.badge;
+        }
+
+        if (chartSection) {
+            chartSection.hidden = tabKey !== 'charts';
+        }
+        if (overviewPlaceholder) {
+            overviewPlaceholder.hidden = tabKey !== 'welcome';
         }
 
         if (updateUrl) {
