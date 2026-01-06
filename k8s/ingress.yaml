@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spotify-app-ingress
+  namespace: spotify-stats
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: spotify-stats.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spotify-app-service
+                port:
+                  number: 8080

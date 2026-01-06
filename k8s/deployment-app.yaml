@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spotify-app
+  namespace: spotify-stats
+  labels:
+    app: spotify-stats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spotify-stats
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: spotify-stats
+        tier: app
+    spec:
+      containers:
+        - name: spotify-app
+          image: spotify-wrapped:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: app-secret
+            - configMapRef:
+                name: app-config
