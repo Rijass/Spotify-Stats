@@ -1,6 +1,7 @@
 package com.spotifywrapped.spotify_wrapped_clone.service.spotify_services;
 
 
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyTopTrackDto;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -104,12 +105,6 @@ public class SpotifyTopTracksService {
     public record SpotifyAlbum(List<SpotifyImage> images) {}
 
     public record SpotifyImage(String url, Integer height, Integer width) {}
-
-    public record SpotifyTopTrackDto(
-            String title,
-            List<String> artists,
-            String imageUrl
-    ) {}
 }
 
 
