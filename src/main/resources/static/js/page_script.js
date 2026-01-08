@@ -1,6 +1,7 @@
 import { API_BASE, USERS_API_BASE } from './modules/api.js';
 import { clearSession, getAccessToken } from './modules/session.js';
 import { loadProfile } from './modules/spotify_profile_ui.js';
+import { loadTopTracks } from './modules/spotify_top_tracks_ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const spotifyButtons = Array.from(document.querySelectorAll('.spotify-login-trigger'));
@@ -22,10 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
             badge: 'Übersicht'
         },
         quicksearch: {
-            title: 'Schnellsuche',
-            lede: 'Finde schnell Playlists, Tracks oder Künstler, sobald du angemeldet bist.',
-            placeholder: 'Nutze die Suche, um Inhalte aus deinem Spotify-Konto zu laden.',
-            badge: 'Suche'
+            title: 'Ihre Top Tracks',
+            lede: 'Hier sehen Sie ihre Top 10 Lieblingssongs in letzter Zeit.',
+            placeholder: 'Schaue hier vorbei wenn du deine Top Songs sehen möchtest.',
+            badge: 'Top Tracks'
         },
         links: {
             title: 'Links & Aktionen',
@@ -65,10 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
             panelBadge.textContent = content.badge;
         }
 
+
         if (updateUrl) {
             const url = new URL(window.location.href);
             url.searchParams.set('tab', tabKey);
             window.history.replaceState({}, '', url.toString());
+        }
+        // UI Reset
+        panelPlaceholder.style.display = (tabKey === 'quicksearch') ? 'none' : 'block';
+
+        // TopTracks nur im Quicksearch laden
+        if (tabKey === 'quicksearch') {
+            loadTopTracks();
         }
     };
 

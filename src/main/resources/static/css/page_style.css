@@ -361,6 +361,44 @@ a {
     pointer-events: none;
 }
 
+/*Top Tracks*/
+
+.tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.track-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    transition: transform .15s ease;
+}
+
+.track-card:hover {
+    transform: translateY(-4px);
+}
+
+.track-card img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.track-card h4 {
+    font-size: .9rem;
+    margin: 6px 0 2px;
+}
+
+.track-card p {
+    font-size: .75rem;
+    opacity: .7;
+}
+
+
 @media (max-width: 960px) {
     .dashboard {
         width: min(100% - 32px, 100%);
