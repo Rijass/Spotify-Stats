@@ -1,4 +1,4 @@
-name: Docker CI
+name: Test CI
 
 on:
   push:
@@ -8,7 +8,6 @@ jobs:
   run:
     runs-on: ubuntu-latest
 
-    # Verwendet ENVIRONMENT, damit vars.* & secrets.* geladen werden
     environment: test
 
     steps:
