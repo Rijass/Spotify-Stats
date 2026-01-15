@@ -10,5 +10,5 @@ data:
   DB_HOST: mysql-service
   DB_PORT: "3306"
   DB_NAME: spotify
-  SPOTIFY_SCOPES: user-read-recently-played playlist-read-private
+  SPOTIFY_SCOPES: user-read-recently-played,playlist-read-private
   SPOTIFY_REDIRECT_URI: http://localhost:8080/api/callback

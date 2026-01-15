@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: spotify-app
-          image: spotify-wrapped:latest
-          imagePullPolicy: IfNotPresent
+          image: rijas144/spotify-stats:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
