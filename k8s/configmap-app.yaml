@@ -12,4 +12,4 @@ data:
   DB_NAME: spotify
   SERVER_ADDRESS: 0.0.0.0
   SPOTIFY_SCOPES: user-read-recently-played,playlist-read-private
-  SPOTIFY_REDIRECT_URI: http://localhost:8080/api/callback
+  SPOTIFY_REDIRECT_URI: https://your-domain.de/api/callback
