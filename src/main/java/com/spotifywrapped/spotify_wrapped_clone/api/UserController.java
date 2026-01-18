@@ -27,7 +27,18 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDtoOut> updateUser(@PathVariable Long id, @RequestBody UserDtoIn userDtoIn) {
+    public ResponseEntity<UserDtoOut> updateUser(
+            @PathVariable Long id,
+            @RequestBody UserDtoIn userDtoIn,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        Long authenticatedUserId = userService.getUserIdFromAccessToken(extractBearerToken(authorization));
+        if (authenticatedUserId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!authenticatedUserId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         UserDtoOut updatedUser = userService.updateUser(id, userDtoIn);
 
         if (updatedUser == null) {
@@ -38,7 +49,17 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Long id,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        Long authenticatedUserId = userService.getUserIdFromAccessToken(extractBearerToken(authorization));
+        if (authenticatedUserId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!authenticatedUserId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         boolean deleted = userService.deleteUser(id);
 
         if (!deleted) {
