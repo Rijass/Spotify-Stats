@@ -21,7 +21,6 @@ jobs:
           java-version: "21"
 
       - name: Build and Push with Jib
-        working-directory: backend
         run: ./mvnw -B -DskipTests clean compile package jib:build
         env:
           JIB_TO_AUTH_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
