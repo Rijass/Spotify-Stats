@@ -32,7 +32,7 @@ Lege im Projekt-Root eine `.env` Datei mit den benötigten Variablen an:
   MYSQL_ROOT_PASSWORD=spotify_root_password
 
   SERVER_PORT=8080
-  SERVER_ADDRESS=127.0.0.1
+  SERVER_ADDRESS=0.0.0.0
 
   APP_CRYPTO_PASSWORD=please-change-me
   APP_CRYPTO_SALT=deadbeefcafebabe
