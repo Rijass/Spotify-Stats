@@ -432,6 +432,54 @@ a {
     font-size: .7rem;
     opacity: .6;
 }
+/* Featured / Popular Playlists */
+
+.playlists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.playlist-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    transition: transform .15s ease;
+}
+
+.playlist-card:hover {
+    transform: translateY(-4px);
+}
+
+.playlist-card img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.playlist-card h4 {
+    font-size: .9rem;
+    margin: 6px 0 2px;
+}
+
+.playlist-card p {
+    font-size: .75rem;
+    opacity: .7;
+}
+
+.playlist-card .owner {
+    display: block;
+    font-size: .7rem;
+    opacity: .6;
+}
+
+.playlist-card .followers {
+    display: block;
+    font-size: .7rem;
+    opacity: .6;
+}
 
 
 

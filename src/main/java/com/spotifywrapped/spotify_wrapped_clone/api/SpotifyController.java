@@ -1,10 +1,6 @@
 package com.spotifywrapped.spotify_wrapped_clone.api;
 
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyLoginDto;
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyProfileDto;
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyStatusDto;
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyTopTrackDto;
-import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyTopArtistDto;
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.*;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 import com.spotifywrapped.spotify_wrapped_clone.service.JwtService;
 import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.*;
@@ -29,6 +25,7 @@ public class SpotifyController {
     private final JwtService jwtService;
     private final SpotifyTopTracksService spotifyTopTracksService;
     private final SpotifyTopArtistsService spotifyTopArtistsService;
+    private final SpotifyFeaturedPlaylistsService spotifyFeaturedPlaylistsService;
 
     public SpotifyController(
             SpotifyAuthService spotifyAuthService,
@@ -37,7 +34,8 @@ public class SpotifyController {
             SpotifyTokenService spotifyTokenService,
             JwtService jwtService,
             SpotifyTopTracksService spotifyTopTracksService,
-            SpotifyTopArtistsService spotifyTopArtistsService
+            SpotifyTopArtistsService spotifyTopArtistsService,
+            SpotifyFeaturedPlaylistsService spotifyFeaturedPlaylistsService
     ) {
         this.spotifyAuthService = spotifyAuthService;
         this.spotifyProfileService = spotifyProfileService;
@@ -46,7 +44,10 @@ public class SpotifyController {
         this.jwtService = jwtService;
         this.spotifyTopTracksService = spotifyTopTracksService;
         this.spotifyTopArtistsService = spotifyTopArtistsService;
+        this.spotifyFeaturedPlaylistsService = spotifyFeaturedPlaylistsService;
     }
+
+    /* ===== AUTH / STATUS ===== */
 
     @GetMapping("/login")
     public ResponseEntity<SpotifyLoginDto> redirectToSpotify(
@@ -101,6 +102,8 @@ public class SpotifyController {
         return ResponseEntity.ok(new SpotifyStatusDto(connected));
     }
 
+    /* ===== PROFILE ===== */
+
     @GetMapping("/profile")
     public ResponseEntity<SpotifyProfileDto> spotifyProfile(
             @RequestHeader(value = "Authorization", required = false) String authorization) {
@@ -116,6 +119,8 @@ public class SpotifyController {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
     }
+
+    /* ===== USER STATS ===== */
 
     @GetMapping("/top-tracks")
     public ResponseEntity<List<SpotifyTopTrackDto>> topTracks(
@@ -144,6 +149,26 @@ public class SpotifyController {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
     }
+
+    /* ===== GLOBAL DISCOVERY ===== */
+
+    @GetMapping("/featured-playlists")
+    public ResponseEntity<List<SpotifyFeaturedPlaylistDto>> featuredPlaylists(
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+
+        User user = userService.findUserByAccessToken(extractBearerToken(authorization));
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        try {
+            return ResponseEntity.ok(
+                    spotifyFeaturedPlaylistsService.fetchFeaturedPlaylists(user)
+            );
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    /* ===== HELPER ===== */
 
     private String extractBearerToken(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) return null;
