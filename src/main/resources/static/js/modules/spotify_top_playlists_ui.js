@@ -31,21 +31,25 @@ export const loadFeaturedPlaylists = async (container) => {
         grid.classList.add('playlists-grid'); // CSS-Grid für die Cards
 
         playlists.forEach(playlist => {
-            const card = document.createElement('div');
+            const card = document.createElement('a'); // <-- <a> statt <div>
             card.className = 'playlist-card';
+            card.href = playlist.spotifyUrl; // <-- Spotify-Link
+            card.target = '_blank';    // Öffnet in neuem Tab
+            card.rel = 'noopener noreferrer'; // Sicherheitsbest practice
 
             card.innerHTML = `
-                <img src="${playlist.imageUrl || ''}" alt="${playlist.name}">
-                <div class="playlist-info">
-                    <h4>${playlist.name}</h4>
-                    <p class="playlist-description">
-                        ${playlist.description || 'Keine Beschreibung verfügbar'}
-                    </p>
-                </div>
-            `;
+        <img src="${playlist.imageUrl || ''}" alt="${playlist.name}">
+        <div class="playlist-info">
+            <h4>${playlist.name}</h4>
+            <p class="playlist-description">
+                ${playlist.description || 'Keine Beschreibung verfügbar'}
+            </p>
+        </div>
+    `;
 
             grid.appendChild(card);
         });
+
 
         container.appendChild(grid);
     } catch (err) {
