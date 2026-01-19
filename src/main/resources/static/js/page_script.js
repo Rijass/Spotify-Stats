@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
         welcome: {
             title: 'Willkommen',
             lede: 'Starte hier, um dein Spotify-Profil und deine Statistiken einzusehen.',
-            placeholder: 'Sobald du verbunden bist, siehst du hier dein persönliches Dashboard.',
+            placeholder: 'Willkommen in deinem persönlichen Spotify Dashboard.\n' +
+                'Hier findest du Auswertungen zu deinen meistgehörten Songs und Artists und erhältst einen Überblick über deinen Musikgeschmack.',
             badge: 'Übersicht'
         },
         quicksearch: {
