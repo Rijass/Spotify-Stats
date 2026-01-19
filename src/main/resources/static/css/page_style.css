@@ -398,6 +398,41 @@ a {
     opacity: .7;
 }
 
+/* Top Artists */
+
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.artist-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    transition: transform .15s ease;
+}
+
+.artist-card:hover { transform: translateY(-4px); }
+
+.artist-card img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.artist-card h4 { font-size: .9rem; margin: 6px 0 2px; }
+
+.artist-card p { font-size: .75rem; opacity: .7; }
+
+.artist-card .followers {
+    display: block;
+    font-size: .7rem;
+    opacity: .6;
+}
+
+
 
 @media (max-width: 960px) {
     .dashboard {

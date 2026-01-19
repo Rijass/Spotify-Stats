@@ -4,12 +4,10 @@ import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyLoginD
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyProfileDto;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyStatusDto;
 import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyTopTrackDto;
+import com.spotifywrapped.spotify_wrapped_clone.api.dto.spotifydto.SpotifyTopArtistDto;
 import com.spotifywrapped.spotify_wrapped_clone.dbaccess.entities.User;
 import com.spotifywrapped.spotify_wrapped_clone.service.JwtService;
-import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyAuthService;
-import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyProfileService;
-import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyTokenService;
-import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.SpotifyTopTracksService;
+import com.spotifywrapped.spotify_wrapped_clone.service.spotify_services.*;
 import com.spotifywrapped.spotify_wrapped_clone.service.user_services.UserService;
 
 import org.springframework.http.HttpStatus;
@@ -30,6 +28,7 @@ public class SpotifyController {
     private final SpotifyTokenService spotifyTokenService;
     private final JwtService jwtService;
     private final SpotifyTopTracksService spotifyTopTracksService;
+    private final SpotifyTopArtistsService spotifyTopArtistsService;
 
     public SpotifyController(
             SpotifyAuthService spotifyAuthService,
@@ -37,7 +36,8 @@ public class SpotifyController {
             UserService userService,
             SpotifyTokenService spotifyTokenService,
             JwtService jwtService,
-            SpotifyTopTracksService spotifyTopTracksService
+            SpotifyTopTracksService spotifyTopTracksService,
+            SpotifyTopArtistsService spotifyTopArtistsService
     ) {
         this.spotifyAuthService = spotifyAuthService;
         this.spotifyProfileService = spotifyProfileService;
@@ -45,6 +45,7 @@ public class SpotifyController {
         this.spotifyTokenService = spotifyTokenService;
         this.jwtService = jwtService;
         this.spotifyTopTracksService = spotifyTopTracksService;
+        this.spotifyTopArtistsService = spotifyTopArtistsService;
     }
 
     @GetMapping("/login")
@@ -52,9 +53,7 @@ public class SpotifyController {
             @RequestHeader(value = "Authorization", required = false) String authorization) {
 
         User user = userService.findUserByAccessToken(extractBearerToken(authorization));
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String state = jwtService.generateSpotifyStateToken(user.getId());
         String authorizationUrl = spotifyAuthService.buildAuthorizationUrl(state);
@@ -68,14 +67,10 @@ public class SpotifyController {
             @RequestParam("state") String state) {
 
         Long userId = jwtService.parseSpotifyStateUserId(state);
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        if (userId == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         User user = userService.findUserById(userId);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         SpotifyAuthService.SpotifyTokenResponse tokenResponse =
                 spotifyAuthService.exchangeCodeForToken(code);
@@ -100,9 +95,7 @@ public class SpotifyController {
             @RequestHeader(value = "Authorization", required = false) String authorization) {
 
         User user = userService.findUserByAccessToken(extractBearerToken(authorization));
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         boolean connected = spotifyTokenService.hasRefreshToken(user.getId());
         return ResponseEntity.ok(new SpotifyStatusDto(connected));
@@ -113,16 +106,11 @@ public class SpotifyController {
             @RequestHeader(value = "Authorization", required = false) String authorization) {
 
         User user = userService.findUserByAccessToken(extractBearerToken(authorization));
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         try {
             SpotifyProfileDto profile = spotifyProfileService.fetchProfile(user);
-            if (profile == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }
-
+            if (profile == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             return ResponseEntity.ok(profile);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
@@ -134,22 +122,31 @@ public class SpotifyController {
             @RequestHeader(value = "Authorization", required = false) String authorization) {
 
         User user = userService.findUserByAccessToken(extractBearerToken(authorization));
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         try {
-            List<SpotifyTopTrackDto> tracks = spotifyTopTracksService.fetchTopTracks(user);
-            return ResponseEntity.ok(tracks);
+            return ResponseEntity.ok(spotifyTopTracksService.fetchTopTracks(user));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping("/top-artists")
+    public ResponseEntity<List<SpotifyTopArtistDto>> topArtists(
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+
+        User user = userService.findUserByAccessToken(extractBearerToken(authorization));
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        try {
+            return ResponseEntity.ok(spotifyTopArtistsService.fetchTopArtists(user));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
     }
 
     private String extractBearerToken(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return null;
-        }
+        if (authorization == null || !authorization.startsWith("Bearer ")) return null;
         return authorization.substring("Bearer ".length()).trim();
     }
 }
