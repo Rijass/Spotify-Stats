@@ -2,6 +2,7 @@ import { API_BASE, USERS_API_BASE } from './modules/api.js';
 import { clearSession, getAccessToken } from './modules/session.js';
 import { loadProfile } from './modules/spotify_profile_ui.js';
 import { loadTopTracks } from './modules/spotify_top_tracks_ui.js';
+import { loadTopArtists } from './modules/spotify_top_artists_ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const spotifyButtons = Array.from(document.querySelectorAll('.spotify-login-trigger'));
@@ -29,10 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
             badge: 'Top Tracks'
         },
         links: {
-            title: 'Links & Aktionen',
-            lede: 'Verwalte deine Shortcuts und Aktionen, die du häufig brauchst.',
-            placeholder: 'Hier erscheinen deine Aktionen, sobald du sie hinterlegt hast.',
-            badge: 'Aktionen'
+            title: 'Ihre Top Artists',
+            lede: 'Hier sehen Sie ihre meistgehörten Künstler in letzter Zeit.',
+            placeholder: 'Schaue hier vorbei wenn du deine Top Artists sehen möchtest.',
+            badge: 'Top Artists'
         },
         explore: {
             title: 'Entdecken',
@@ -43,42 +44,44 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setActiveTab = (tabKey, updateUrl = true) => {
+        const panelBody = document.querySelector('.panel-body');
+
+        // Alten Modulinhalt entfernen
+        panelBody.querySelectorAll('.tab-module').forEach(el => el.remove());
+
         const content = tabContent[tabKey] || tabContent.welcome;
+
+        // Nav Pill toggle
         navPills.forEach((pill) => {
-            const isActive = pill.dataset.tab === tabKey;
-            pill.classList.toggle('active', isActive);
+            pill.classList.toggle('active', pill.dataset.tab === tabKey);
         });
 
-        if (panel) {
-            panel.dataset.activeTab = tabKey;
-        }
-
-        if (panelTitle) {
-            panelTitle.textContent = content.title;
-        }
-        if (panelLede) {
-            panelLede.textContent = content.lede;
-        }
-        if (panelPlaceholder) {
-            panelPlaceholder.querySelector('.muted').textContent = content.placeholder;
-        }
-        if (panelBadge) {
-            panelBadge.textContent = content.badge;
-        }
-
+        if (panel) panel.dataset.activeTab = tabKey;
+        if (panelTitle) panelTitle.textContent = content.title;
+        if (panelLede) panelLede.textContent = content.lede;
+        if (panelPlaceholder) panelPlaceholder.querySelector('.muted').textContent = content.placeholder;
+        if (panelBadge) panelBadge.textContent = content.badge;
 
         if (updateUrl) {
             const url = new URL(window.location.href);
             url.searchParams.set('tab', tabKey);
             window.history.replaceState({}, '', url.toString());
         }
-        // UI Reset
-        panelPlaceholder.style.display = (tabKey === 'quicksearch') ? 'none' : 'block';
 
-        // TopTracks nur im Quicksearch laden
-        if (tabKey === 'quicksearch') {
-            loadTopTracks();
+        // Placeholder steuern
+        if (tabKey === 'quicksearch' || tabKey === 'links') {
+            panelPlaceholder.style.display = 'none';
+        } else {
+            panelPlaceholder.style.display = 'block';
         }
+
+        // Module laden in eigenen Container
+        const container = document.createElement('div');
+        container.classList.add('tab-module'); // eindeutige Klasse für spätere Entfernung
+        panelBody.appendChild(container);
+
+        if (tabKey === 'quicksearch') loadTopTracks(container);
+        if (tabKey === 'links') loadTopArtists(container);
     };
 
     const unlockDashboard = () => {
@@ -99,9 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const response = await fetch(`${USERS_API_BASE}/session`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
+            headers: { Authorization: `Bearer ${accessToken}` }
         });
         if (!response.ok) {
             window.location.href = 'index.html';
@@ -118,9 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const response = await fetch(`${API_BASE}/spotify/status`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
+            headers: { Authorization: `Bearer ${accessToken}` }
         });
         if (!response.ok) {
             keepLocked();
@@ -138,9 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Initialer Tab
     const initialTab = new URLSearchParams(window.location.search).get('tab') || 'welcome';
     setActiveTab(initialTab, false);
 
+    // Tab-Klick-Events
     navPills.forEach((pill) => {
         pill.addEventListener('click', () => {
             const tabKey = pill.dataset.tab;
@@ -148,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Spotify Login Buttons
     spotifyButtons.forEach((button) => {
         button.addEventListener('click', () => {
             const accessToken = getAccessToken();
@@ -157,41 +159,33 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             fetch(`${API_BASE}/spotify/login`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
+                headers: { Authorization: `Bearer ${accessToken}` }
             })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('Spotify Login fehlgeschlagen.');
-                    }
+                .then(response => {
+                    if (!response.ok) throw new Error('Spotify Login fehlgeschlagen.');
                     return response.json();
                 })
-                .then((data) => {
-                    if (data?.authorizationUrl) {
-                        window.location.href = data.authorizationUrl;
-                    }
+                .then(data => {
+                    if (data?.authorizationUrl) window.location.href = data.authorizationUrl;
                 })
-                .catch((error) => {
+                .catch(error => {
                     console.error(error);
                     keepLocked();
                 });
         });
     });
 
-    const handleLogout = async () => {
-        clearSession();
-        window.location.href = 'index.html';
-    };
-
+    // Logout
     if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
+        logoutButton.addEventListener('click', () => {
+            clearSession();
+            window.location.href = 'index.html';
+        });
     }
 
-    ensureSession().then((authenticated) => {
-        if (!authenticated) {
-            return;
-        }
+    // Session prüfen und Dashboard freischalten
+    ensureSession().then(authenticated => {
+        if (!authenticated) return;
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('connected') === 'spotify') {
