@@ -3,6 +3,7 @@ import { clearSession, getAccessToken } from './modules/session.js';
 import { loadProfile } from './modules/spotify_profile_ui.js';
 import { loadTopTracks } from './modules/spotify_top_tracks_ui.js';
 import { loadTopArtists } from './modules/spotify_top_artists_ui.js';
+import { loadFeaturedPlaylists } from './modules/spotify_top_playlists_ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const spotifyButtons = Array.from(document.querySelectorAll('.spotify-login-trigger'));
@@ -70,19 +71,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Placeholder steuern
-        if (tabKey === 'quicksearch' || tabKey === 'links') {
-            panelPlaceholder.style.display = 'none';
-        } else {
-            panelPlaceholder.style.display = 'block';
-        }
+        const moduleTabs = ['quicksearch', 'links', 'explore'];
+        panelPlaceholder.style.display = moduleTabs.includes(tabKey) ? 'none' : 'block';
 
-        // Module laden in eigenen Container
+        // Module laden
         const container = document.createElement('div');
-        container.classList.add('tab-module'); // eindeutige Klasse für spätere Entfernung
+        container.classList.add('tab-module');
         panelBody.appendChild(container);
 
         if (tabKey === 'quicksearch') loadTopTracks(container);
-        if (tabKey === 'links') loadTopArtists(container);
+        else if (tabKey === 'links') loadTopArtists(container);
+        else if (tabKey === 'explore') loadFeaturedPlaylists(container);
     };
 
     const unlockDashboard = () => {
