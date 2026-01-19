@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         explore: {
             title: 'Entdecken',
-            lede: 'Lass dir Empfehlungen und Analysen anzeigen, wenn dein Konto verbunden ist.',
+            lede: 'Entdecke neue Lieder und Playlist',
             placeholder: 'Empfehlungen und Trends warten hier auf dich.',
             badge: 'Explore'
         }
