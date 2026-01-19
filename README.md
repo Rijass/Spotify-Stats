@@ -24,8 +24,12 @@ Zur einfachen Exploration und Dokumentation der REST-API wird Swagger UI eingese
 wodurch alle verfügbaren Endpunkte übersichtlich einsehbar und testbar sind.
 
 Ziel des Projekts ist es, ein eigenes, dauerhaft verfügbares „Spotify Wrapped“-ähnliches Erlebnis zu schaffen,
-das persönliche Auswertungen mit globalen Musiktrends kombiniert und dabei auf moderne,
-bewährte Backend-Technologien setzt.
+das persönliche Auswertungen mit globalen Musiktrends kombiniert.
+
+
+![Top Songs](images/TopSongs.png)
+![Top Artists](images/TopArtists.png)
+![Explore](images/Explore.png)
 </details>
 
 <details>
