@@ -3,10 +3,8 @@ kind: Service
 metadata:
   name: spotify-app-service
   namespace: spotify-stats
-  labels:
-    app: spotify-stats
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: spotify-stats
     tier: app
@@ -14,4 +12,4 @@ spec:
     - name: http
       port: 8080
       targetPort: 8080
-  
+      nodePort: 30080

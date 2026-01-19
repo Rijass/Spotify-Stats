@@ -1,19 +1,24 @@
-name: Docker CI
+name: Test CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ["**"]
 
 jobs:
   run:
     runs-on: ubuntu-latest
 
-    # Verwendet ENVIRONMENT, damit vars.* & secrets.* geladen werden
     environment: test
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
 
       - name: Generate .env from GitHub Secrets + Variables
         run: |

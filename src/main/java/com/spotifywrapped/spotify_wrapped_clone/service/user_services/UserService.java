@@ -92,6 +92,10 @@ public class UserService {
         return jwtService.parseUserId(accessToken) != null;
     }
 
+    public Long getUserIdFromAccessToken(String accessToken) {
+        return jwtService.parseUserId(accessToken);
+    }
+
     public User findUserByAccessToken(String accessToken) {
         Long userId = jwtService.parseUserId(accessToken);
         if (userId == null) {
