@@ -1,34 +1,44 @@
-# Spotify-tracker
+# Spotify-Stats
 
 ## Tabs
 
 <details>
   <summary>Zusammenfassung</summary>
 
-Spotify-Tracker ist eine Webanwendung zur Analyse und Visualisierung persönlicher Spotify-Hörgewohnheiten.
+### Überblick
+
+Spotify-Stats ist eine Webanwendung zur Analyse und Visualisierung persönlicher Spotify-Hörgewohnheiten.
 Nach der Anmeldung mit einem Spotify-Account zeigt das Dashboard unter anderem die meistgehörten Songs,
 Lieblings-Artists sowie weitere musikbezogene Statistiken an.
 
 Zusätzlich bietet die Anwendung eine Übersicht über aktuell populäre Playlists, um globale Musiktrends
 zu entdecken und neue Inhalte kennenzulernen.
 
-Die App nutzt die Spotify Web API und OAuth-Authentifizierung. Der von Spotify bereitgestellte Refresh-Token
-wird sicher in der Datenbank gespeichert und ermöglicht es, automatisch neue Access-Tokens zu beziehen,
-ohne dass sich Nutzer:innen bei jedem Besuch erneut mit Spotify verbinden müssen.
-
-Für die Authentifizierung innerhalb der Anwendung werden JSON Web Tokens (JWT) verwendet.
-Datenbankschemata und Versionierungen werden über Flyway-Migrationen verwaltet, um eine saubere
-und reproduzierbare Entwicklung sicherzustellen.
-
-Zur einfachen Exploration und Dokumentation der REST-API wird Swagger UI eingesetzt,
-wodurch alle verfügbaren Endpunkte übersichtlich einsehbar und testbar sind.
-
 Ziel des Projekts ist es, ein eigenes, dauerhaft verfügbares „Spotify Wrapped“-ähnliches Erlebnis zu schaffen,
 das persönliche Auswertungen mit globalen Musiktrends kombiniert.
 
+### Technische Details
+
+- Spotify Web API + OAuth-Authentifizierung mit Refresh-Token-Handling
+- JWT für die Anwendungssitzung, Flyway für Datenbank-Migrationen
+- Swagger UI zur Exploration und Dokumentation der REST-API
+- Jib für Container-Builds im CI (ohne Dockerfile), GitHub Actions für Tests/Builds
+- Automatisches Publish bei Push auf `main` ins Docker-Repository:
+  <https://hub.docker.com/r/rijas144/spotify-stats/tags>
+
+
+### Features
+
+**Top-Songs:** zeigt die meistgehörten Songs.
 
 ![Top Songs](images/TopSongs.png)
+
+**Top-Artists:** Übersicht der Lieblings-Artists.
+
 ![Top Artists](images/TopArtists.png)
+
+**Explore:** aktuelle, globale Playlists zum Entdecken neuer Musik.
+
 ![Explore](images/Explore.png)
 </details>
 
