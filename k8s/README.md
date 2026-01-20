@@ -30,7 +30,6 @@ Traefik wird deaktiviert/entfernt, damit es keine Port-/Ingress-Konflikte gibt.
 > Wenn du `DOMAIN`/`LE_EMAIL` anpasst, muss das auch in `k8s/ingress.yaml` und `k8s/cluster-issuer.yaml` stehen.
 
 ```bash
-set -euo pipefail
 
 DOMAIN="your-domain.de"
 LE_EMAIL="your-mail@exmaple.de"
