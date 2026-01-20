@@ -40,6 +40,16 @@ das persönliche Auswertungen mit globalen Musiktrends kombiniert.
 **Explore:** aktuelle, globale Playlists zum Entdecken neuer Musik.
 
 ![Explore](images/Explore.png)
+
+### Spotify Developer Account (Quick Run-down)
+1. Spotify Account erstellen oder anmelden: <https://www.spotify.com/account/overview/>
+2. Developer Dashboard öffnen: <https://developer.spotify.com/dashboard>
+3. Neue App anlegen (Name + Beschreibung) und die **Client ID** sowie **Client Secret** notieren.
+4. Unter **Edit Settings** die Redirect-URI hinterlegen, z. B.:
+   `http://127.0.0.1:8080/api/spotify/callback`
+
+> Hinweis: Für einige Spotify-Endpoints kann ein Premium-Account erforderlich sein.
+> Details: <https://developer.spotify.com/documentation/web-api/>
 </details>
 
 <details>
