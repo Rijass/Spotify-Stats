@@ -28,6 +28,8 @@ Traefik wird deaktiviert/entfernt, damit es keine Port-/Ingress-Konflikte gibt.
 
 > Als User mit sudo-Rechten ausführen.  
 > Wenn du `DOMAIN`/`LE_EMAIL` anpasst, muss das auch in `k8s/ingress.yaml` und `k8s/cluster-issuer.yaml` stehen.
+> Es sollte zudem auch die `configmap-app.yaml` da dort der Spotify Redirect link drin steht.
+> Die `secret-app.yaml` muss geändern werden dort sollten spezielle Spotify Daten eingetragen werden, Passwörter geändern werden etc.
 
 ```bash
 
